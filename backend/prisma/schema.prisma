@@ -1,0 +1,219 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- 1. User & Authentication (RBAC) ---
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String    
+  role          Role      @default(TENANT)
+  isActive      Boolean   @default(true)
+  
+  // Relations
+  adminProfile  Admin?
+  tenantProfile Tenant?
+  techProfile   Technician?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  TENANT
+  TECHNICIAN
+  OWNER
+}
+
+model Admin {
+  id      String @id @default(cuid())
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id])
+  staffId String @unique
+}
+
+model Technician {
+  id           String               @id @default(cuid())
+  userId       String               @unique
+  user         User                 @relation(fields: [userId], references: [id])
+  expertise    String?
+  assignedJobs MaintenanceRequest[] @relation("TechnicianTasks")
+}
+
+// --- 2. Space Management ---
+model Room {
+  id                String               @id @default(cuid())
+  number            String               @unique
+  floor             Int
+  status            RoomStatus           @default(VACANT)
+  pricePerMonth     Float
+  
+  // Relations
+  leases            Lease[]              // Historical Data
+  meterReadings     MeterReading[]
+  maintenanceJobs   MaintenanceRequest[]
+  
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+}
+
+enum RoomStatus {
+  VACANT
+  OCCUPIED
+  MAINTENANCE
+}
+ 
+// --- 3. Lease & Tenant ---  
+model Lease {
+  id             String      @id @default(cuid())
+  roomId         String
+  room           Room        @relation(fields: [roomId], references: [id])
+  tenantId       String
+  tenant         Tenant      @relation(fields: [tenantId], references: [id])
+  
+  startDate      DateTime
+  endDate        DateTime?
+  agreedBaseRent Float
+  status         LeaseStatus @default(ACTIVE)
+  
+  invoices       Invoice[]
+  
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+}
+
+enum LeaseStatus {
+  ACTIVE
+  TERMINATED
+  COMPLETED
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  
+  firstName   String
+  lastName    String
+  phone       String
+  nationalId  String   @unique
+  
+  leases      Lease[]
+  payments    Payment[]
+  requests    MaintenanceRequest[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// --- 4. Utility & Billing ---
+model MeterReading {
+  id                 String      @id @default(cuid())
+  roomId             String
+  room               Room        @relation(fields: [roomId], references: [id])
+  
+  month              String      // Format: "2024-03"
+  utilityType        UtilityType
+  
+  previousValue      Float
+  currentValue       Float
+  usage              Float       // currentValue - previousValue
+  rateAtTime         Float       
+  isReset            Boolean     @default(false) // In the case of a meter loop or a meter replacement.
+  
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@unique([roomId, month, utilityType])
+}
+
+enum UtilityType {
+  WATER
+  ELECTRICITY
+}
+
+model Invoice {
+  id               String        @id @default(cuid())
+  invoiceNumber    String        @unique
+  leaseId          String
+  lease            Lease         @relation(fields: [leaseId], references: [id])
+  
+  month            String        // Format: "March 2024"
+  baseRent         Float
+  electricityCost  Float
+  waterCost        Float
+  otherCharges     Float         @default(0)
+  totalAmount      Float
+  
+  status           InvoiceStatus @default(UNPAID)
+  dueDate          DateTime?
+  
+  payments         Payment[]
+  
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PENDING_VERIFY // Once the tenant uploads the slip.
+  PAID
+  OVERDUE
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice       @relation(fields: [invoiceId], references: [id])
+  tenantId    String
+  tenant      Tenant        @relation(fields: [tenantId], references: [id])
+  
+  amount      Float
+  slipUrl     String?       // Store the Path/URL of the slip image
+  status      PaymentStatus @default(PENDING)
+  
+  verifiedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REJECTED
+}
+
+// --- 5. Maintenance System (FR-09, FR-10) ---
+model MaintenanceRequest {
+  id            String            @id @default(cuid())
+  roomId        String
+  room          Room              @relation(fields: [roomId], references: [id])
+  tenantId      String
+  tenant        Tenant            @relation(fields: [tenantId], references: [id])
+  
+  description   String
+  imageUrl      String?           // Image of the problem
+  status        MaintenanceStatus @default(OPEN)
+  
+  technicianId  String?
+  technician    Technician?       @relation("TechnicianTasks", fields: [technicianId], references: [id])
+  
+  adminNotes    String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+enum MaintenanceStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REJECTED
+}
