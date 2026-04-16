@@ -31,6 +31,10 @@ interface RoomCardProps {
 export function RoomCard({ room }: RoomCardProps) {
   const status = statusConfig[room.status] || statusConfig.VACANT;
 
+  const tenantDisplayName = room.currentTenant 
+    ? `${room.currentTenant.firstName} ${room.currentTenant.lastName}`
+    : null;
+
   return (
     <div className="bg-card border border-border rounded-xl p-4 hover:border-foreground/20 transition-colors">
       <div className="flex items-center justify-between mb-3">
@@ -50,16 +54,20 @@ export function RoomCard({ room }: RoomCardProps) {
         <span className="text-sm text-muted-foreground ml-1">/mo</span>
       </div>
       
-      {room.tenant ? (
+      {room.currentTenant ? (
         <div className="flex items-center gap-2 pt-3 border-t border-border">
-          <div className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center shrink-0">
-            <User className="h-3.5 w-3.5 text-muted-foreground" />
+          <div className="h-7 w-7 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+            <User className="h-3.5 w-3.5 text-blue-500" />
           </div>
-          <p className="text-sm truncate">{room.tenant.name}</p>
+          <p className="text-sm font-medium truncate text-blue-700">
+            {tenantDisplayName}
+          </p>
         </div>
       ) : (
         <div className="pt-3 border-t border-border">
-          <p className="text-sm text-muted-foreground">No tenant</p>
+          <p className="text-sm text-muted-foreground italic">
+            {room.status === 'MAINTENANCE' ? 'Under Repair' : 'No occupant'}
+          </p>
         </div>
       )}
     </div>

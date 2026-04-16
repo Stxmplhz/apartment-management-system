@@ -43,11 +43,27 @@ export interface Room {
   tenant?: { name: string } | null
   meterReadings?: MeterReading[]
   maintenanceJobs?: MaintenanceRequest[]
+  leases?: Lease[]
+  currentLease?: Lease | null
+  currentTenant?: Tenant | null
   createdAt: string
   updatedAt: string
 }
 
 // --- Lease & Tenant ---
+export interface Lease {
+  id: string
+  roomId: string
+  room?: Room
+  tenantId: string
+  tenant: Tenant
+  startDate: string
+  endDate?: string | null
+  agreedBaseRent: number
+  status: LeaseStatus
+  createdAt: string
+  updatedAt: string
+}
 
 export interface Tenant {
   id: string

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { CheckCircle, Zap, Droplets, Loader2 } from "lucide-react"
 import type { Room, MeterReading } from "@/lib/types"
 import { toast } from "sonner"
-import { cn, getImageUrl, formatCurrency } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 const ELECTRICITY_RATE = 4.5
 const WATER_RATE = 18
 
@@ -281,3 +281,10 @@ export default function MeterReadingPage() {
     </div>
   )
 }
+
+/*
+- Previous: This is the meter reading shown on the last day of the previous month (the start of this month).
+- Current: This is the reading recorded by the administrator at the room on this day. 
+- Usage: This is the difference in usage for the entire month, calculated as: Usage = Current - Previous
+- Estimated (Total): This is the sum of the units used and the "price per unit" set by the building: Estimated Cost = Usage x Rate (Price per unit)
+*/
