@@ -31,26 +31,20 @@ export default function MeterReadingPage() {
 
   const loadData = async () => {
     try {
-      const [rooms, readings] = await Promise.all([
-        api.rooms.list({ status: 'OCCUPIED' }),
-        api.meters.list({ month: currentMonth }),
-      ])
+      setLoading(true)
+      const roomsWithPendingMeters = await api.meters.pending(currentMonth)
       
-      setOccupiedRooms(rooms)
+      setOccupiedRooms(roomsWithPendingMeters)
       
-      // Initialize meter data
       const initial: Record<string, MeterData> = {}
-      rooms.forEach((room: Room) => {
-        const elecReading = readings.find((r: MeterReading) => r.roomId === room.id && r.utilityType === 'ELECTRICITY')
-        const waterReading = readings.find((r: MeterReading) => r.roomId === room.id && r.utilityType === 'WATER')
-        
+      roomsWithPendingMeters.forEach((room: any) => {
         initial[room.id] = {
           electricity: { 
-            previous: elecReading?.value ?? 0, 
+            previous: room.lastElecReading?.currentValue ?? 0,
             current: "" 
           },
           water: { 
-            previous: waterReading?.value ?? 0, 
+            previous: room.lastWaterReading?.currentValue ?? 0,
             current: "" 
           },
         }
@@ -58,7 +52,7 @@ export default function MeterReadingPage() {
       setMeterData(initial)
     } catch (error) {
       console.error('Failed to load data:', error)
-      toast.error('Failed to load room data')
+      toast.error('Failed to load pending meter data')
     } finally {
       setLoading(false)
     }
@@ -85,27 +79,28 @@ export default function MeterReadingPage() {
     setSubmitting(true)
     
     try {
-      const promises = occupiedRooms.map(async (room) => {
+      const promises = occupiedRooms.map(room => {
         const data = meterData[room.id]
-        if (!data) return
-        
-        const elecCurrent = parseFloat(data.electricity.current)
-        const waterCurrent = parseFloat(data.water.current)
-        
-        if (isNaN(elecCurrent) || isNaN(waterCurrent)) return
-        
-        return api.meters.create({
+        if (!data || !data.electricity.current || !data.water.current) return null
+
+        return api.meters.bulkCreate({
           roomId: room.id,
           month: currentMonth,
-          electricityPrevious: data.electricity.previous,
-          electricityCurrent: elecCurrent,
-          waterPrevious: data.water.previous,
-          waterCurrent: waterCurrent,
+          electricity: {
+            previousValue: data.electricity.previous,
+            currentValue: parseFloat(data.electricity.current),
+            rateAtTime: ELECTRICITY_RATE
+          },
+          water: {
+            previousValue: data.water.previous,
+            currentValue: parseFloat(data.water.current),
+            rateAtTime: WATER_RATE
+          }
         })
       })
-      
+
       await Promise.all(promises.filter(Boolean))
-      
+      toast.success('All readings saved successfully!')
       setSubmitted(true)
       toast.success('Meter readings saved!')
       
@@ -178,7 +173,9 @@ export default function MeterReadingPage() {
               <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary/30">
                 <div>
                   <h3 className="font-semibold">Room {room.number}</h3>
-                  <p className="text-sm text-muted-foreground">{room.tenant?.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {room.currentTenant ? `${room.currentTenant.firstName} ${room.currentTenant.lastName}` : 'No Tenant'}
+                  </p>
                 </div>
                 {(elecCalc.valid || waterCalc.valid) && (
                   <div className="text-right">

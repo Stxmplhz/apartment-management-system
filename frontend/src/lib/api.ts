@@ -84,6 +84,8 @@ export const api = {
     }) => fetchApi<MeterReading>('/api/meters', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: Partial<MeterReading>) => 
       fetchApi<MeterReading>(`/api/meters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    bulkCreate: (data: { roomId: string, month: string, electricity: any, water: any }) => 
+      fetchApi('/api/meters/bulk', { method: 'POST', body: JSON.stringify(data) }),
   },
   
   // Invoices

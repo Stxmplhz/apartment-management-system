@@ -45,8 +45,7 @@ export const meterRoutes = new Elysia({ prefix: '/api/meters' })
           take: 1,
         },
         meterReadings: {
-          where: month ? { month } : {},
-          orderBy: { createdAt: 'desc' },
+          orderBy: { createdAt: 'desc' }, 
         },
       },
       orderBy: [
@@ -58,16 +57,15 @@ export const meterRoutes = new Elysia({ prefix: '/api/meters' })
     // Filter rooms that don't have both readings for current month
     const pendingRooms = occupiedRooms.filter(room => {
       if (!month) return true
-      const hasElecReading = room.meterReadings.some(r => r.month === month && r.utilityType === 'ELECTRICITY')
-      const hasWaterReading = room.meterReadings.some(r => r.month === month && r.utilityType === 'WATER')
-      return !hasElecReading || !hasWaterReading
+      const hasReadingThisMonth = room.meterReadings.some(r => r.month === month)
+      return !hasReadingThisMonth
     })
     
     return pendingRooms.map(room => ({
       ...room,
       currentTenant: room.leases[0]?.tenant || null,
-      lastElecReading: room.meterReadings.find(r => r.utilityType === 'ELECTRICITY'),
-      lastWaterReading: room.meterReadings.find(r => r.utilityType === 'WATER'),
+      lastElecReading: room.meterReadings.find(r => r.utilityType === 'ELECTRICITY') || null,
+      lastWaterReading: room.meterReadings.find(r => r.utilityType === 'WATER') || null,
     }))
   }, {
     query: t.Object({
