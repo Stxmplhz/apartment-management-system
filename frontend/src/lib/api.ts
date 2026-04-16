@@ -117,7 +117,9 @@ export const api = {
     get: (id: string) => fetchApi<Payment>(`/api/payments/${id}`),
     create: (data: { invoiceId: string; amount: number; slipUrl?: string }) => 
       fetchApi<Payment>('/api/payments', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: { status?: string; slipUrl?: string }) => 
+    verify: (id: string, status: string) => 
+    fetchApi<Payment>(`/api/payments/${id}/verify`, { method: 'PUT', body: JSON.stringify({ status }) }),
+    update: (id: string, data: { status?: string; slipUrl?: string; amount?: number }) => 
       fetchApi<Payment>(`/api/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) => 
       fetchApi<{ success: boolean }>(`/api/payments/${id}`, { method: 'DELETE' }),

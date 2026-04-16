@@ -41,7 +41,6 @@ export interface Room {
   status: RoomStatus
   pricePerMonth: number
   tenant?: { name: string } | null
-  currentTenant?: { name: string } | null
   meterReadings?: MeterReading[]
   maintenanceJobs?: MaintenanceRequest[]
   createdAt: string
@@ -72,17 +71,14 @@ export interface MeterReading {
   roomId: string
   month: string
   utilityType: UtilityType
-  value: number
   previousValue: number
   usage: number
   rateAtTime: number
   isReset: boolean
-
   electricityPrevious?: number 
   electricityCurrent?: number
   waterPrevious?: number
   waterCurrent?: number
-  
   createdAt: string
   updatedAt: string
 }
@@ -114,7 +110,6 @@ export interface Payment {
   amount: number
   slipUrl?: string | null
   status: PaymentStatus
-  submittedAt: string 
   createdAt: string
   updatedAt: string
 }

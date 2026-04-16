@@ -2,9 +2,10 @@ import { useState, useCallback, useEffect } from "react"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { cn, formatCurrency, formatShortDate } from "@/lib/utils"
-import { Upload, Check, X, Image as ImageIcon, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { Upload, Check, X, Clock, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import type { Payment, PaymentStatus } from "@/lib/types"
 import { toast } from "sonner"
+import { getImageUrl } from "@/lib/utils"
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([])
@@ -74,17 +75,18 @@ export default function PaymentsPage() {
   }
 
   const handleStatusChange = async (paymentId: string, status: PaymentStatus) => {
-    try {
-      await api.payments.update(paymentId, { status })
-      setPayments(prev => 
-        prev.map(p => p.id === paymentId ? { ...p, status } : p)
-      )
-      toast.success(status === 'PAID' ? 'Payment approved' : 'Payment rejected')
-    } catch (error) {
-      console.error('Failed to update payment:', error)
-      toast.error('Failed to update payment status')
-    }
+  try {
+    await api.payments.verify(paymentId, status) 
+    
+    setPayments(prev => 
+      prev.map(p => p.id === paymentId ? { ...p, status } : p)
+    )
+    toast.success(status === 'PAID' ? 'Payment approved' : 'Payment rejected')
+  } catch (error) {
+    console.error('Failed to update payment:', error)
+    toast.error('Failed to update payment status')
   }
+}
 
   const statusConfig = {
     PENDING: { label: "Pending", icon: Clock, bg: "bg-amber-500/15", text: "text-amber-500", border: "border-amber-500/30" },
@@ -168,10 +170,18 @@ export default function PaymentsPage() {
               {/* Slip Upload Area */}
               <div className="relative">
                 {payment.slipUrl ? (
-                  <div className="aspect-[4/3] bg-secondary flex items-center justify-center">
-                    <div className="text-center">
-                      <ImageIcon className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                      <p className="text-sm text-muted-foreground">Slip uploaded</p>
+                  <div className="aspect-[4/3] bg-secondary relative overflow-hidden group">
+                    <img 
+                      src={getImageUrl(payment.slipUrl)} 
+                      alt="Payment Slip" 
+                      className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => {
+                        const url = getImageUrl(payment.slipUrl);
+                        if (url) window.open(url, '_blank');
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <p className="text-white text-xs font-medium">Click to expand</p>
                     </div>
                   </div>
                 ) : (
@@ -230,7 +240,7 @@ export default function PaymentsPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Submitted</span>
-                    <span>{formatShortDate(payment.submittedAt)}</span>
+                    <span>{formatShortDate(payment.createdAt)}</span>
                   </div>
                 </div>
 

@@ -35,3 +35,14 @@ export function formatShortDate(date: string | Date | null | undefined): string 
     day: 'numeric',
   }).format(d);
 }
+
+export const getImageUrl = (url: string | null | undefined): string => {
+  if (!url) return ''; 
+  
+  if (url.startsWith('http') || url.startsWith('data:')) {
+    return url;
+  }
+  
+  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  return `${apiBase}${url.startsWith('/') ? '' : '/'}${url}`;
+};  
