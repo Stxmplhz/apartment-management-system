@@ -253,7 +253,7 @@ async function main() {
       invoiceId: invoice2.id,
       tenantId: tenant2User.tenantProfile!.id,
       amount: 6840,
-      slipUrl: '/uploads/slips/slip-102-march.jpg',
+      slipUrl: 'https://www.kasikornbank.com/SiteCollectionDocuments/personal/digital-banking/kplus/v2/img/en/instruction/transfer-paynowid-13.png',
       status: PaymentStatus.PENDING,
     }
   })
@@ -263,7 +263,7 @@ async function main() {
       invoiceId: invoice3.id,
       tenantId: tenant3User.tenantProfile!.id,
       amount: 6760,
-      slipUrl: '/uploads/slips/slip-201-march.jpg',
+      slipUrl: 'https://pattaya-pages.com/wp-content/uploads/2022/05/Screenshot_20220527-150835.jpg',
       status: PaymentStatus.PAID,
       verifiedAt: new Date('2024-03-03'),
     }
@@ -277,7 +277,7 @@ async function main() {
       roomId: rooms[0].id,
       tenantId: tenant1User.tenantProfile!.id,
       description: 'Air conditioner not cooling properly',
-      imageUrl: '/uploads/maintenance/ac-issue.jpg',
+      imageUrl: 'https://lirp.cdn-website.com/eb0d1dad/dms3rep/multi/opt/Split+system+Air+Conditioner-640w.jpg',
       status: MaintenanceStatus.OPEN,
     }
   })
@@ -287,7 +287,7 @@ async function main() {
       roomId: rooms[1].id,
       tenantId: tenant2User.tenantProfile!.id,
       description: 'Water leak from bathroom ceiling',
-      imageUrl: '/uploads/maintenance/leak.jpg',
+      imageUrl: 'https://ranshaw.com/uploads/_900xAUTO_crop_center-center/Ranshaw-Ceiling-Water-Leak.jpg',
       status: MaintenanceStatus.IN_PROGRESS,
       technicianId: techUser.techProfile!.id,
       adminNotes: 'Assigned to technician for inspection',

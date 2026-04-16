@@ -1,4 +1,4 @@
-import type { Room, Tenant, MeterReading, Invoice, Payment, MoveInRequest, MaintenanceRequest, AuthResponse } from './types'
+import type { Room, Tenant, MeterReading, Invoice, Payment, MoveInRequest, MaintenanceRequest, Technician, AuthResponse } from './types'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -135,11 +135,13 @@ export const api = {
       return fetchApi<MaintenanceRequest[]>(`/api/maintenance${query ? `?${query}` : ''}`)
     },
     get: (id: string) => fetchApi<MaintenanceRequest>(`/api/maintenance/${id}`),
-    create: (data: { roomId: string; description: string; imageUrl?: string }) =>
+    create: (data: { tenantId: string; description: string; imageUrl?: string }) =>
       fetchApi<MaintenanceRequest>('/api/maintenance', { method: 'POST', body: JSON.stringify(data) }),
     updateStatus: (id: string, status: string) =>
       fetchApi<MaintenanceRequest>(`/api/maintenance/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
     assign: (id: string, technicianId: string) =>
       fetchApi<MaintenanceRequest>(`/api/maintenance/${id}/assign`, { method: 'PUT', body: JSON.stringify({ technicianId }) }),
+    listTechnicians: () => 
+      fetchApi<Technician[]>('/api/maintenance/technicians/list'),
   },
 }
