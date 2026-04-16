@@ -21,6 +21,7 @@ export default function MoveInPage() {
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState("")
+  const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [nationalId, setNationalId] = useState("")
@@ -75,12 +76,20 @@ export default function MoveInPage() {
     setSubmitting(true)
     
     try {
+      const nameParts = name.trim().split(/\s+/)
+      const firstName = nameParts[0] || ""
+      const lastName = nameParts.slice(1).join(" ") || "-"
+      
       await api.tenants.create({
-        name,
+        email,         
+        firstName,    
+        lastName,     
         phone,
         nationalId,
         roomId: selectedRoom,
-        moveInDate: new Date().toISOString(),
+        startDate: new Date().toISOString(),
+        initialElectricity: 0,
+        initialWater: 0
       })
       
       setSubmitted(true)
@@ -95,9 +104,14 @@ export default function MoveInPage() {
         setIdFile(null)
         loadAvailableRooms()
       }, 3000)
-    } catch (error) {
-      console.error('Failed to register tenant:', error)
-      toast.error('Failed to register tenant')
+    } catch (error: any) {
+    console.error('Failed to register tenant:', error)
+    
+    const errorMessage = error instanceof Error ? error.message : 'Failed to register tenant'
+    toast.error(errorMessage, {
+      description: "Please check if Email or National ID is already in use.",
+      duration: 5000, 
+    })
     } finally {
       setSubmitting(false)
     }
@@ -180,6 +194,20 @@ export default function MoveInPage() {
                 value={name}
                 onChange={e => setName(e.target.value)}
                 className="h-11 rounded-lg"
+              />
+            </div>
+
+            {/* Email Address */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="tenant@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="h-11 rounded-lg"
+                required
               />
             </div>
 

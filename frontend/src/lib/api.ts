@@ -1,4 +1,4 @@
-import type { Room, Tenant, MeterReading, Invoice, Payment, MaintenanceRequest, AuthResponse } from './types'
+import type { Room, Tenant, MeterReading, Invoice, Payment, MoveInRequest, MaintenanceRequest, AuthResponse } from './types'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -9,11 +9,12 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
       'Content-Type': 'application/json',
       ...options?.headers,
     },
-  })
+  })  
   
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }))
-    throw new Error(error.error || `HTTP error! status: ${response.status}`)
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    
+    throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
   }
   
   return response.json()
@@ -52,8 +53,8 @@ export const api = {
   tenants: {
     list: () => fetchApi<Tenant[]>('/api/tenants'),
     get: (id: string) => fetchApi<Tenant>(`/api/tenants/${id}`),
-    create: (data: { name: string; phone: string; nationalId: string; roomId: string; moveInDate: string }) => 
-      fetchApi<Tenant>('/api/tenants', { method: 'POST', body: JSON.stringify(data) }),
+    create: (data: MoveInRequest) => 
+      fetchApi<AuthResponse>('/api/tenants/move-in', { method: 'POST',  body: JSON.stringify(data) }),
     update: (id: string, data: Partial<Tenant>) => 
       fetchApi<Tenant>(`/api/tenants/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     moveOut: (id: string) => 
