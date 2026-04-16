@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { CheckCircle, Zap, Droplets, Loader2 } from "lucide-react"
 import type { Room, MeterReading } from "@/lib/types"
 import { toast } from "sonner"
-
+import { cn, getImageUrl, formatCurrency } from "@/lib/utils"
 const ELECTRICITY_RATE = 4.5
 const WATER_RATE = 18
 
@@ -30,33 +30,33 @@ export default function MeterReadingPage() {
   }, [])
 
   const loadData = async () => {
-    try {
-      setLoading(true)
-      const roomsWithPendingMeters = await api.meters.pending(currentMonth)
-      
-      setOccupiedRooms(roomsWithPendingMeters)
-      
-      const initial: Record<string, MeterData> = {}
-      roomsWithPendingMeters.forEach((room: any) => {
-        initial[room.id] = {
-          electricity: { 
-            previous: room.lastElecReading?.currentValue ?? 0,
-            current: "" 
-          },
-          water: { 
-            previous: room.lastWaterReading?.currentValue ?? 0,
-            current: "" 
-          },
-        }
-      })
-      setMeterData(initial)
-    } catch (error) {
-      console.error('Failed to load data:', error)
-      toast.error('Failed to load pending meter data')
-    } finally {
-      setLoading(false)
-    }
+  try {
+    setLoading(true)
+    const roomsData = await api.meters.pending(currentMonth)
+    setOccupiedRooms(roomsData)
+    
+    const initial: Record<string, MeterData> = {}
+    roomsData.forEach((room: any) => {
+      initial[room.id] = {
+        electricity: { 
+          previous: room.baselineData.electricity, 
+          current: room.recordedData.electricity?.toString() || "", 
+          isSaved: room.isSaved 
+        },
+        water: { 
+          previous: room.baselineData.water, 
+          current: room.recordedData.water?.toString() || "", 
+          isSaved: room.isSaved
+        },
+      }
+    })
+    setMeterData(initial)
+  } catch (error) {
+    toast.error('Failed to sync data with database')
+  } finally {
+    setLoading(false)
   }
+}
 
   const updateMeter = (roomId: string, type: 'electricity' | 'water', value: string) => {
     setMeterData(prev => ({
@@ -76,8 +76,8 @@ export default function MeterReadingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitting(true)
-    
+
+    setSubmitting(true)  
     try {
       const promises = occupiedRooms.map(room => {
         const data = meterData[room.id]
@@ -103,7 +103,7 @@ export default function MeterReadingPage() {
       toast.success('All readings saved successfully!')
       setSubmitted(true)
       toast.success('Meter readings saved!')
-      
+        
       setTimeout(() => {
         setSubmitted(false)
         loadData()
@@ -124,7 +124,7 @@ export default function MeterReadingPage() {
     )
   }
 
-  if (submitted) {
+   if (submitted) {
     return (
       <div className="max-w-md mx-auto mt-20">
         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-8 text-center">
@@ -162,20 +162,26 @@ export default function MeterReadingPage() {
         {occupiedRooms.map(room => {
           const data = meterData[room.id]
           if (!data) return null
+          const isSaved = data?.electricity.isSaved && data?.water.isSaved
           
           const elecCalc = calculateUsage(data.electricity.previous, data.electricity.current)
           const waterCalc = calculateUsage(data.water.previous, data.water.current)
           const totalCost = (elecCalc.valid ? elecCalc.usage * ELECTRICITY_RATE : 0) + (waterCalc.valid ? waterCalc.usage * WATER_RATE : 0)
 
           return (
-            <div key={room.id} className="bg-card border border-border rounded-xl overflow-hidden">
+            <div key={room.id} className={cn(
+              "bg-card border rounded-xl overflow-hidden transition-all",
+              isSaved ? "opacity-75 border-emerald-500/30 bg-emerald-500/5" : "border-border"
+            )}>
               {/* Room Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary/30">
-                <div>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <div className="flex items-center gap-3">
                   <h3 className="font-semibold">Room {room.number}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {room.currentTenant ? `${room.currentTenant.firstName} ${room.currentTenant.lastName}` : 'No Tenant'}
-                  </p>
+                  {isSaved && (
+                    <span className="flex items-center gap-1 text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase font-bold">
+                      <CheckCircle className="h-3 w-3" /> Recorded
+                    </span>
+                  )}
                 </div>
                 {(elecCalc.valid || waterCalc.valid) && (
                   <div className="text-right">
@@ -206,10 +212,10 @@ export default function MeterReadingPage() {
                         <Label className="text-xs text-muted-foreground mb-1.5 block">Current</Label>
                         <Input
                           type="number"
-                          placeholder="kWh"
                           value={data.electricity.current}
+                          disabled={isSaved} 
                           onChange={e => updateMeter(room.id, 'electricity', e.target.value)}
-                          className="h-10 rounded-lg"
+                          className={isSaved ? "bg-secondary/50 border-none" : ""}
                         />
                       </div>
                     </div>
@@ -242,6 +248,7 @@ export default function MeterReadingPage() {
                           type="number"
                           placeholder="units"
                           value={data.water.current}
+                          disabled={isSaved}
                           onChange={e => updateMeter(room.id, 'water', e.target.value)}
                           className="h-10 rounded-lg"
                         />

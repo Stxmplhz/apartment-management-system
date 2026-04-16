@@ -31,46 +31,44 @@ export const meterRoutes = new Elysia({ prefix: '/api/meters' })
   
   // Get readings for occupied rooms (for recording new readings)
   .get('/pending', async ({ query }) => {
-    const { month } = query
+    const { month } = query // เช่น "2026-04"
     
-    // Get occupied rooms with active leases
     const occupiedRooms = await prisma.room.findMany({
       where: { status: 'OCCUPIED' },
       include: {
         leases: {
           where: { status: 'ACTIVE' },
-          include: {
-            tenant: true,
-          },
+          include: { tenant: true },
           take: 1,
         },
         meterReadings: {
           orderBy: { createdAt: 'desc' }, 
         },
       },
-      orderBy: [
-        { floor: 'asc' },
-        { number: 'asc' },
-      ],
+      orderBy: [{ floor: 'asc' }, { number: 'asc' }],
     })
     
-    // Filter rooms that don't have both readings for current month
-    const pendingRooms = occupiedRooms.filter(room => {
-      if (!month) return true
-      const hasReadingThisMonth = room.meterReadings.some(r => r.month === month)
-      return !hasReadingThisMonth
+    return occupiedRooms.map(room => {
+      const thisMonthReadingElec = room.meterReadings.find(r => r.month === month && r.utilityType === 'ELECTRICITY')
+      const thisMonthReadingWater = room.meterReadings.find(r => r.month === month && r.utilityType === 'WATER')
+
+      const lastReadingElec = room.meterReadings.find(r => r.month !== month && r.utilityType === 'ELECTRICITY')
+      const lastReadingWater = room.meterReadings.find(r => r.month !== month && r.utilityType === 'WATER')
+
+      return {
+        ...room,
+        currentTenant: room.leases[0]?.tenant || null,
+        isSaved: !!thisMonthReadingElec && !!thisMonthReadingWater, 
+        recordedData: {
+          electricity: thisMonthReadingElec?.currentValue || null,
+          water: thisMonthReadingWater?.currentValue || null
+        },
+        baselineData: {
+          electricity: lastReadingElec?.currentValue ?? 0,
+          water: lastReadingWater?.currentValue ?? 0
+        }
+      }
     })
-    
-    return pendingRooms.map(room => ({
-      ...room,
-      currentTenant: room.leases[0]?.tenant || null,
-      lastElecReading: room.meterReadings.find(r => r.utilityType === 'ELECTRICITY') || null,
-      lastWaterReading: room.meterReadings.find(r => r.utilityType === 'WATER') || null,
-    }))
-  }, {
-    query: t.Object({
-      month: t.Optional(t.String()),
-    }),
   })
   
   // Record meter reading (handles both ELECTRICITY and WATER)
