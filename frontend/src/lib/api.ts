@@ -1,18 +1,36 @@
-import type { Room, Tenant, MeterReading, Invoice, Payment, MoveInRequest, MaintenanceRequest, Technician, AuthResponse } from './types'
+import type { User, Room, Tenant, MeterReading, Invoice, Payment, MoveInRequest, MaintenanceRequest, Technician, AuthResponse, ApiSuccess } from './types'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
+interface ValidationErrorDetail {
+  path: string;
+  message: string;
+  value?: any;
+}
+
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+  const isFormData = options?.body instanceof FormData;
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      // ✅ ถ้าเป็น FormData ห้ามตั้ง Content-Type เอง เดี๋ยว Browser จัดการ Boundary ให้
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...options?.headers,
     },
+    
+    body: isFormData ? options.body : (options?.body ? JSON.stringify(options.body) : undefined),
   })  
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+    
+    if (errorData.details && Array.isArray(errorData.details)) {
+      const msg = (errorData.details as ValidationErrorDetail[])
+        .map((d) => `${d.path.substring(1)}: ${d.message}`)
+        .join(', ')
+      throw new Error(`Validation Error: ${msg}`)
+    }
     
     throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
   }
@@ -29,8 +47,25 @@ export const api = {
       fetchApi<{ success: boolean }>('/api/auth/logout', { method: 'POST' }),
     getMe: () =>
       fetchApi('/api/auth/me'),
+    registerTechnician: (data: any) => 
+      fetchApi<ApiSuccess>('/api/auth/register-technician', { 
+        method: 'POST', 
+        body: JSON.stringify(data) 
+      }),
   },
   
+  // Users
+  users: {
+    list: () => fetchApi<User[]>('/api/users'),
+    toggleStatus: (id: string, isActive: boolean) =>
+      fetchApi<User>(`/api/users/${id}/status`, { 
+        method: 'PUT', 
+        body: JSON.stringify({ isActive }) 
+      }),
+    delete: (id: string) =>
+      fetchApi<ApiSuccess>(`/api/users/${id}`, { method: 'DELETE' }),
+  },
+
   // Rooms
   rooms: {
     list: (params?: { status?: string; floor?: string }) => {
@@ -53,12 +88,14 @@ export const api = {
   tenants: {
     list: () => fetchApi<Tenant[]>('/api/tenants'),
     get: (id: string) => fetchApi<Tenant>(`/api/tenants/${id}`),
-    create: (data: MoveInRequest) => 
-      fetchApi<AuthResponse>('/api/tenants/move-in', { method: 'POST',  body: JSON.stringify(data) }),
+    create: (data: any) => 
+      fetchApi<any>('/api/tenants/move-in', { method: 'POST', body: data }),
     update: (id: string, data: Partial<Tenant>) => 
       fetchApi<Tenant>(`/api/tenants/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     moveOut: (id: string) => 
       fetchApi<{ success: boolean }>(`/api/tenants/${id}`, { method: 'DELETE' }),
+    resetPassword: (id: string) =>
+      fetchApi<any>(`/api/tenants/${id}/reset-password`, { method: 'POST' }),
   },
   
   // Meter Readings

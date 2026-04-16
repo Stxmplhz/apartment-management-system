@@ -4,333 +4,150 @@ import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Upload, X, CheckCircle, UserPlus, FileText, Loader2 } from "lucide-react"
-import { cn, formatCurrency } from "@/lib/utils"
-import type { Room } from "@/lib/types"
+import { Card } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Upload, X, CheckCircle, UserPlus, FileText, Loader2, Zap, Droplets, Landmark } from "lucide-react"
+import { formatCurrency } from "@/lib/utils"
 import { toast } from "sonner"
 
 export default function MoveInPage() {
-  const [availableRooms, setAvailableRooms] = useState<Room[]>([])
+  const [availableRooms, setAvailableRooms] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [generatedPass, setGeneratedPass] = useState(null)
+
+  // Form States
   const [selectedRoom, setSelectedRoom] = useState("")
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [nationalId, setNationalId] = useState("")
-  const [idFile, setIdFile] = useState<File | null>(null)
-  const [dragActive, setDragActive] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
+  const [rent, setRent] = useState("")
+  const [initElec, setInitElec] = useState("0")
+  const [initWater, setInitWater] = useState("0")
+  const [idFile, setIdFile] = useState(null)
 
-  useEffect(() => {
-    loadAvailableRooms()
-  }, [])
+  useEffect(() => { loadAvailableRooms() }, [])
 
   const loadAvailableRooms = async () => {
     try {
       const rooms = await api.rooms.list({ status: 'VACANT' })
       setAvailableRooms(rooms)
-    } catch (error) {
-      console.error('Failed to load rooms:', error)
-      toast.error('Failed to load available rooms')
-    } finally {
-      setLoading(false)
-    }
+    } catch (error) { toast.error('Failed to load rooms') } 
+    finally { setLoading(false) }
   }
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }, [])
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
+    if (!idFile) return toast.error("Please upload ID image")
     
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setIdFile(e.dataTransfer.files[0])
-    }
-  }, [])
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setIdFile(e.target.files[0])
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
     setSubmitting(true)
-    
     try {
       const nameParts = name.trim().split(/\s+/)
-      const firstName = nameParts[0] || ""
-      const lastName = nameParts.slice(1).join(" ") || "-"
       
-      await api.tenants.create({
-        email,         
-        firstName,    
-        lastName,     
-        phone,
-        nationalId,
-        roomId: selectedRoom,
-        startDate: new Date().toISOString(),
-        initialElectricity: 0,
-        initialWater: 0
-      })
-      
-      setSubmitted(true)
-      toast.success('Tenant registered successfully!')
-      
-      setTimeout(() => {
-        setSubmitted(false)
-        setSelectedRoom("")
-        setName("")
-        setPhone("")
-        setNationalId("")
-        setIdFile(null)
-        loadAvailableRooms()
-      }, 3000)
-    } catch (error: any) {
-    console.error('Failed to register tenant:', error)
-    
-    const errorMessage = error instanceof Error ? error.message : 'Failed to register tenant'
-    toast.error(errorMessage, {
-      description: "Please check if Email or National ID is already in use.",
-      duration: 5000, 
-    })
-    } finally {
-      setSubmitting(false)
-    }
-  }
+      const formData = new FormData()
+      formData.append('email', email)
+      formData.append('firstName', nameParts[0])
+      formData.append('lastName', nameParts.slice(1).join(" ") || "-")
+      formData.append('phone', phone)
+      formData.append('nationalId', nationalId)
+      formData.append('roomId', selectedRoom)
+      formData.append('startDate', new Date().toISOString())
+      formData.append('agreedBaseRent', String(rent || "0"))
+      formData.append('initialElectricity', String(initElec || "0"))
+      formData.append('initialWater', String(initWater || "0"))
+      formData.append('idCardFile', idFile)
 
-  const isValid = selectedRoom && name && phone && nationalId && idFile
+      const res = await api.tenants.create(formData)
+      
+      if (res.error) throw new Error(res.error)
+
+      setGeneratedPass(res.tempPassword)
+      setSubmitted(true)
+      toast.success('Registration Complete')
+    } catch (error) { 
+      toast.error(error.message) 
+    } finally { setSubmitting(false) }
+  }
 
   if (submitted) {
     return (
-      <div className="max-w-md mx-auto mt-20">
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-8 text-center">
-          <div className="h-14 w-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="h-7 w-7 text-emerald-500" />
-          </div>
-          <h2 className="text-lg font-semibold mb-1">Registration Complete</h2>
-          <p className="text-sm text-muted-foreground">Tenant has been successfully registered</p>
+      <div className="max-w-md mx-auto mt-20 p-8 border rounded-2xl text-center space-y-6 bg-card shadow-lg animate-in zoom-in-95">
+        <div className="h-16 w-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle className="h-10 w-10 text-emerald-500" />
         </div>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold">Registration Complete!</h2>
+          <p className="text-muted-foreground text-sm">Tenant account and lease created.</p>
+        </div>
+        <div className="p-6 bg-secondary/50 rounded-xl space-y-2 border border-dashed">
+          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Temporary Password</p>
+          <p className="font-mono text-3xl font-bold text-primary tracking-widest">{generatedPass}</p>
+        </div>
+        <Button onClick={() => window.location.reload()} className="w-full">Next Registration</Button>
       </div>
     )
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Move-in Registration</h1>
-        <p className="text-muted-foreground mt-1">Register a new tenant to an available room</p>
-      </div>
+    <div className="space-y-8 max-w-5xl mx-auto pb-20">
+      <h1 className="text-2xl font-bold tracking-tight">Move-in Registration</h1>
 
-      <div className="grid lg:grid-cols-[1fr,320px] gap-6">
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="bg-card border border-border rounded-xl p-5 space-y-5">
-            <div className="flex items-center gap-3 pb-4 border-b border-border">
-              <div className="h-9 w-9 rounded-lg bg-secondary flex items-center justify-center">
-                <UserPlus className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div>
-                <h2 className="font-medium">Tenant Information</h2>
-                <p className="text-xs text-muted-foreground">Enter the new tenant details</p>
-              </div>
-            </div>
-
-            {/* Room Selector */}
+      <form onSubmit={handleSubmit} className="grid lg:grid-cols-2 gap-8 items-start">
+        {/* Left Column: Tenant Profile */}
+        <Card className="p-6 space-y-4">
+          <h2 className="font-semibold flex items-center gap-2 border-b pb-3 text-blue-600"><UserPlus className="h-4 w-4" /> Tenant Details</h2>
+          <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="room" className="text-sm">Select Room</Label>
-              <Select value={selectedRoom} onValueChange={setSelectedRoom}>
-                <SelectTrigger id="room" className="h-11 rounded-lg">
-                  <SelectValue placeholder="Choose an available room" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableRooms.length === 0 ? (
-                    <SelectItem value="none" disabled>No rooms available</SelectItem>
-                  ) : (
-                    availableRooms.map(room => (
-                      <SelectItem key={room.id} value={room.id}>
-                        <span className="font-medium">Room {room.number}</span>
-                        <span className="text-muted-foreground ml-2">- {formatCurrency(room.pricePerMonth)}/mo</span>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
+              <Label>Select Room</Label>
+              <Select value={selectedRoom} onValueChange={(val) => {
+                setSelectedRoom(val)
+                const r = availableRooms.find(rm => rm.id === val)
+                if(r) setRent(r.pricePerMonth.toString())
+              }}>
+                <SelectTrigger className="h-11"><SelectValue placeholder="Choose a vacant room" /></SelectTrigger>
+                <SelectContent>{availableRooms.map(r => <SelectItem key={r.id} value={r.id}>Room {r.number} ({formatCurrency(r.pricePerMonth)})</SelectItem>)}</SelectContent>
               </Select>
             </div>
-
-            {/* Tenant Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="Enter tenant's full name"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                className="h-11 rounded-lg"
-              />
+            <div className="space-y-2"><Label>Full Name</Label><Input required placeholder="Firstname Lastname" value={name} onChange={e => setName(e.target.value)} /></div>
+            <div className="space-y-2"><Label>Email</Label><Input type="email" required placeholder="tenant@email.com" value={email} onChange={e => setEmail(e.target.value)} /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label>Phone</Label><Input required value={phone} onChange={e => setPhone(e.target.value)} /></div>
+              <div className="space-y-2"><Label>National ID</Label><Input required maxLength={13} value={nationalId} onChange={e => setNationalId(e.target.value)} /></div>
             </div>
-
-            {/* Email Address */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tenant@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="h-11 rounded-lg"
-                required
-              />
-            </div>
-
-            {/* Phone Number */}
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm">Phone Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="e.g., 081-234-5678"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                className="h-11 rounded-lg"
-              />
-            </div>
-
-            {/* National ID */}
-            <div className="space-y-2">
-              <Label htmlFor="nationalId" className="text-sm">National ID</Label>
-              <Input
-                id="nationalId"
-                placeholder="13-digit national ID"
-                value={nationalId}
-                onChange={e => setNationalId(e.target.value)}
-                className="h-11 rounded-lg"
-                maxLength={13}
-              />
-            </div>
-
-            {/* National ID Upload */}
-            <div className="space-y-2">
-              <Label className="text-sm">National ID Document</Label>
-              {idFile ? (
-                <div className="flex items-center justify-between bg-secondary/50 border border-border rounded-lg p-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-9 w-9 rounded-lg bg-background flex items-center justify-center shrink-0">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{idFile.name}</p>
-                      <p className="text-xs text-muted-foreground">{(idFile.size / 1024).toFixed(1)} KB</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIdFile(null)}
-                    className="h-8 w-8 flex items-center justify-center hover:bg-background rounded-lg transition-colors shrink-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                  className={cn(
-                    "border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer",
-                    dragActive
-                      ? "border-foreground/40 bg-secondary"
-                      : "border-border hover:border-foreground/20 hover:bg-secondary/50"
-                  )}
-                >
-                  <input
-                    type="file"
-                    id="id-upload"
-                    accept="image/*,.pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <label htmlFor="id-upload" className="cursor-pointer">
-                    <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
-                      <Upload className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium mb-1">Drop file here or click to browse</p>
-                    <p className="text-xs text-muted-foreground">JPG, PNG, or PDF up to 10MB</p>
-                  </label>
-                </div>
-              )}
+              <Label>Identification Image</Label>
+              <div className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-secondary transition-colors relative cursor-pointer">
+                <input type="file" required className="absolute inset-0 opacity-0" onChange={(e) => setIdFile(e.target.files[0])} />
+                <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm font-medium">{idFile ? idFile.name : "Click to upload ID Card Image"}</p>
+              </div>
             </div>
           </div>
+        </Card>
 
-          <Button 
-            type="submit" 
-            className="w-full h-11 rounded-lg" 
-            disabled={!isValid || submitting}
-          >
-            {submitting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <UserPlus className="h-4 w-4 mr-2" />
-            )}
-            Register Tenant
+        {/* Right Column: Lease & Initial Meter */}
+        <div className="space-y-6">
+          <Card className="p-6 space-y-6">
+            <h2 className="font-semibold flex items-center gap-2 border-b pb-3 text-blue-600"><Landmark className="h-4 w-4" /> Lease Terms</h2>
+            <div className="space-y-2">
+              <Label>Monthly Rent (THB)</Label>
+              <Input type="number" required value={rent} onChange={e => setRent(e.target.value)} className="text-xl font-bold text-emerald-600" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2"><Label className="flex gap-1 text-xs"><Zap className="h-3 w-3" /> Initial Electric</Label><Input type="number" value={initElec} onChange={e => setInitElec(e.target.value)} /></div>
+              <div className="space-y-2"><Label className="flex gap-1 text-xs"><Droplets className="h-3 w-3" /> Initial Water</Label><Input type="number" value={initWater} onChange={e => setInitWater(e.target.value)} /></div>
+            </div>
+          </Card>
+          <Button type="submit" size="lg" className="w-full h-14 text-lg font-bold shadow-md" disabled={submitting}>
+            {submitting ? <Loader2 className="animate-spin mr-2" /> : <UserPlus className="mr-2" />}
+            Register & Generate Account
           </Button>
-        </form>
-
-        {/* Side Info */}
-        <div className="space-y-4">
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">Available Rooms</p>
-            <p className="text-3xl font-semibold mt-1 text-emerald-500">{availableRooms.length}</p>
-            <p className="text-sm text-muted-foreground">ready for move-in</p>
-          </div>
-          <div className="bg-secondary/50 border border-border rounded-xl p-4">
-            <h3 className="font-medium mb-3 text-sm">Required Documents</h3>
-            <ul className="space-y-2.5 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                <span>National ID card (both sides)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                <span>Valid phone number</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
-                <span>Security deposit (2 months)</span>
-              </li>
-            </ul>
-          </div>
         </div>
-      </div>
+      </form>
     </div>
   )
 }

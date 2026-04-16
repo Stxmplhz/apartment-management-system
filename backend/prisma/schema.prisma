@@ -103,6 +103,7 @@ model Tenant {
   lastName    String
   phone       String
   nationalId  String   @unique
+  idCardUrl   String?
   
   leases      Lease[]
   payments    Payment[]

@@ -1,16 +1,17 @@
 import { ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Outlet } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Role } from '@/lib/types'
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import { toast } from "sonner"
 
 interface ProtectedRouteProps {
-  children: ReactNode
-  requiredRoles?: Role[]
+  children?: ReactNode 
+  allowedRoles?: Role[] 
 }
 
-export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { isAuthenticated, user, isLoading } = useAuth()
   const navigate = useNavigate()
   const [isAuthorized, setIsAuthorized] = useState(false)
@@ -23,10 +24,10 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
       return
     }
 
-    // Check if user has required role
-    if (requiredRoles && requiredRoles.length > 0) {
-      if (!requiredRoles.includes(user.role)) {
-        // Redirect to appropriate dashboard based on role
+    if (allowedRoles && allowedRoles.length > 0) {
+      if (!allowedRoles.includes(user.role)) {
+        toast.error("You don't have permission to access this page")
+        
         if (user.role === 'TENANT') {
           navigate('/dashboard', { replace: true })
         } else if (user.role === 'TECHNICIAN') {
@@ -39,7 +40,7 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
     }
 
     setIsAuthorized(true)
-  }, [isAuthenticated, user, isLoading, requiredRoles, navigate])
+  }, [isAuthenticated, user, isLoading, allowedRoles, navigate])
 
   if (isLoading) {
     return (
@@ -48,10 +49,9 @@ export function ProtectedRoute({ children, requiredRoles }: ProtectedRouteProps)
       </div>
     )
   }
-
   if (!isAuthenticated || !isAuthorized) {
     return null
   }
 
-  return <>{children}</>
+  return children ? <>{children}</> : <Outlet />
 }

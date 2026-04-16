@@ -183,3 +183,34 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
       newPassword: t.String(),
     }),
   })
+
+  // Register Technician
+  .post('/register-technician', async ({ body }) => {
+  const { email, password, firstName, lastName, phone, expertise } = body
+  
+  const hashedPassword = await hash(password, 10)
+  
+  const newUser = await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      role: 'TECHNICIAN',
+      techProfile: {
+        create: {
+          expertise,
+        }
+      }
+    }
+  })
+  
+  return { success: true, userId: newUser.id }
+}, {
+  body: t.Object({
+    email: t.String(),
+    password: t.String(),
+    firstName: t.String(),
+    lastName: t.String(),
+    phone: t.String(),
+    expertise: t.Optional(t.String()),
+  })
+})

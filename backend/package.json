@@ -11,9 +11,10 @@
     "db:seed": "bunx prisma db seed"
   },
   "dependencies": {
-    "elysia": "^1.1.0",
     "@elysiajs/cors": "^1.1.0",
-    "@prisma/client": "^5.18.0"
+    "@elysiajs/static": "^1.4.9",
+    "@prisma/client": "^5.18.0",
+    "elysia": "^1.1.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

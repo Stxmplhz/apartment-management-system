@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "@/contexts/AuthContext"
 import { cn } from "@/lib/utils"
-import { Building2, UserPlus, Gauge, FileText, CreditCard, Menu, X, Wrench, Home, LogOut } from "lucide-react"
+import { Building2, UserPlus, Gauge, FileText, CreditCard, Menu, X, Wrench, Home, LogOut, Users } from "lucide-react"
 
 export function Navigation() {
   const location = useLocation()
@@ -23,13 +23,11 @@ export function Navigation() {
         { href: "/invoices", label: "Invoices", icon: FileText },
         { href: "/payments", label: "Payments", icon: CreditCard },
         { href: "/maintenance", label: "Maintenance", icon: Wrench },
+        { href: "/users", label: "Accounts", icon: Users },
       ]
     } else if (user.role === 'TENANT') {
       return [
         { href: "/dashboard", label: "My Dashboard", icon: Home },
-        { href: "/invoices", label: "My Invoices", icon: FileText },
-        { href: "/payments", label: "My Payments", icon: CreditCard },
-        { href: "/maintenance", label: "My Requests", icon: Wrench },
       ]
     } else if (user.role === 'TECHNICIAN') {
       return [
