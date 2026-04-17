@@ -6,33 +6,40 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
   // Get all invoices
   .get('/', async ({ query }) => {
     const { status, month, leaseId } = query
-    
     const where: any = {}
     if (status) where.status = status as InvoiceStatus
     if (month) where.month = month
     if (leaseId) where.leaseId = leaseId
-    
+
     const invoices = await prisma.invoice.findMany({
       where,
       include: {
         lease: {
-          include: {
-            room: true,
-            tenant: true,
-          },
+          include: { room: true, tenant: true },
         },
-        payments: true,
       },
       orderBy: { createdAt: 'desc' },
     })
-    
-    return invoices
-  }, {
-    query: t.Object({
-      status: t.Optional(t.String()),
-      month: t.Optional(t.String()),
-      leaseId: t.Optional(t.String()),
-    }),
+
+    const enrichedInvoices = await Promise.all(invoices.map(async (inv) => {
+      const readings = await prisma.meterReading.findMany({
+        where: {
+          roomId: inv.lease.roomId,
+          month: inv.month 
+        }
+      })
+
+      const elecUsage = readings.find(r => r.utilityType === 'ELECTRICITY')?.usage || 0
+      const waterUsage = readings.find(r => r.utilityType === 'WATER')?.usage || 0
+
+      return {
+        ...inv,
+        electricityUsage: elecUsage, 
+        waterUsage: waterUsage
+      }
+    }))
+
+    return enrichedInvoices
   })
   
   // Get single invoice

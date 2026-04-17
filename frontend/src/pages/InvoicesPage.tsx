@@ -62,48 +62,30 @@ export default function InvoicesPage() {
 
   const handleDownload = (invoice: any) => {
     const doc = new jsPDF();
-    
-    const formatPDFCurrency = (amount: number) => {
-      return `THB ${new Intl.NumberFormat('th-TH').format(amount || 0)}`;
-    };
+    const elecUsage = invoice.electricityUsage || (invoice.electricityCost / 4.5);
+    const waterUsage = invoice.waterUsage || (invoice.waterCost / 18);
+
+    const formatPDFCurrency = (amount: number) => `THB ${new Intl.NumberFormat('th-TH').format(amount || 0)}`;
 
     const lease = invoice.lease;
     const tenant = lease?.tenant;
     const room = lease?.room;
-
     const tName = tenant ? `${tenant.firstName} ${tenant.lastName}` : "Unknown Tenant";
     const rNum = room?.number || "N/A";
-    const invNo = invoice.invoiceNumber || invoice.id?.slice(-8);
 
-    // 1. Header
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
     doc.text("INVOICE", 105, 20, { align: "center" });
     
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
-    doc.text(`Invoice No: ${invNo}`, 14, 35);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 40);
-    doc.text(`Billing Month: ${invoice.month || "N/A"}`, 14, 45);
-
-    // 2. Tenant Info
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("Tenant Information:", 14, 60);
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+    doc.text(`Invoice No: ${invoice.invoiceNumber || invoice.id?.slice(-8)}`, 14, 35);
     doc.text(`Name: ${tName}`, 14, 67);
     doc.text(`Room: Room ${rNum}`, 14, 72);
 
-    // Table 
-    const elecUsage = invoice.electricityUsage || 0;
-    const waterUsage = invoice.waterUsage || 0;
-
     const tableData = [
       ["Base Rent", "-", formatPDFCurrency(invoice.baseRent)],
-      ["Electricity", `${elecUsage} kWh`, formatPDFCurrency(invoice.electricityCost)],
-      ["Water", `${waterUsage} units`, formatPDFCurrency(invoice.waterCost)],
+      ["Electricity", `${elecUsage.toFixed(2)} kWh`, formatPDFCurrency(invoice.electricityCost)],
+      ["Water", `${waterUsage.toFixed(2)} units`, formatPDFCurrency(invoice.waterCost)],
     ];
 
     autoTable(doc, {
@@ -111,23 +93,15 @@ export default function InvoicesPage() {
       head: [["Description", "Details", "Amount"]],
       body: tableData,
       theme: 'striped',
-      headStyles: { fillColor: [37, 99, 235], fontStyle: 'bold' },
-      styles: { font: "helvetica" }
+      headStyles: { fillColor: [37, 99, 235] }
     });
 
-    // 4. Summary
     // @ts-ignore
     const finalY = (doc as any).lastAutoTable.finalY + 15;
-    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.text(`Total Amount: ${formatPDFCurrency(invoice.totalAmount)}`, 196, finalY, { align: "right" });
 
-    // 5. Footer
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "italic");
-    doc.text("Thank you for your stay!", 105, finalY + 25, { align: "center" });
-
-    doc.save(`Invoice-${rNum}-${invoice.month?.replace(/\s+/g, '-') || 'file'}.pdf`);
+    doc.save(`Invoice-${rNum}-${invoice.month}.pdf`);
   };
 
   const filters: { value: 'all' | InvoiceStatus; label: string; count: number }[] = [
