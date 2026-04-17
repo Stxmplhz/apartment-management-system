@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { prisma } from '../lib/prisma'
 import { hash } from 'bcryptjs'
-import { mkdir } from 'node:fs/promises'
+import cloudinary from '../lib/cloudinary'
 
 export const tenantRoutes = new Elysia({ prefix: '/api/tenants' })
   .onError(({ code, error, set }) => {
@@ -84,94 +84,116 @@ export const tenantRoutes = new Elysia({ prefix: '/api/tenants' })
   // Create tenant with Move-in (UC-01)
   .post('/move-in', async ({ body, set }) => {
     try {
-      // ✅ ดึงค่าจาก body แบบตรงๆ (Manual Extraction)
+      console.log("📥 [System] Received Move-in Request for:", body.email);
+
       const { 
         email, firstName, lastName, phone, nationalId, 
-        roomId, startDate, agreedBaseRent, 
+        roomId, startDate, endDate, agreedBaseRent, 
         initialElectricity, initialWater,
-        idCardFile 
+        idCardFile, contractFile 
       } = body
 
-      // ✅ 1. ตรวจสอบข้อมูลเบื้องต้น (แทนที่ระบบอัตโนมัติที่พัง)
-      if (!email || !firstName || !roomId) {
-        set.status = 400
-        return { error: 'Missing required fields (Email, Name, or Room)' }
+      const rentVal = parseFloat(agreedBaseRent) || 0;
+      const elecVal = parseFloat(initialElectricity) || 0;
+      const waterVal = parseFloat(initialWater) || 0;
+
+      if (!idCardFile || !contractFile) {
+        set.status = 400;
+        return { error: 'Please upload both your ID card and rental agreement.' };
       }
 
-      // 2. ตรวจสอบห้อง
-      const room = await prisma.room.findUnique({ where: { id: roomId } })
-      if (!room || room.status !== 'VACANT') {
-        set.status = 400
-        return { error: 'Room is not available' }
-      }
+      const uploadToCloudinary = async (file: File, folder: string): Promise<string> => {
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        formData.append("upload_preset", "apartment_preset");
+        formData.append("folder", folder);
 
-      // 3. จัดการไฟล์รูป (idCardFile)
-      let idCardUrl = null
-      if (idCardFile && idCardFile instanceof File) {
-        try {
-          const uploadDir = './uploads/id-cards'
-          await mkdir(uploadDir, { recursive: true })
-          const fileName = `${Date.now()}-${nationalId}.png`
-          await Bun.write(`${uploadDir}/${fileName}`, idCardFile)
-          idCardUrl = `/uploads/id-cards/${fileName}`
-        } catch (err) {
-          console.error("File save error:", err)
+        const response = await fetch("https://api.cloudinary.com/v1_1/dwho7vbl5/image/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error(`❌ [Cloudinary Fetch Error] ${folder}:`, data);
+          throw new Error(data.error?.message || "Cloudinary upload failed");
         }
-      }
 
-      // 4. เตรียม Password และบันทึกข้อมูล
+        console.log(`✅ [Cloudinary] ${folder} Uploaded:`, data.secure_url);
+        return data.secure_url;
+      };
+
+      console.log("☁️ [System] Uploading documents to Cloudinary...");
+      const idCardUrl = await uploadToCloudinary(idCardFile, 'apartment_id_cards');
+      const contractUrl = await uploadToCloudinary(contractFile, 'apartment_contracts');
+
       const tempPassword = Math.random().toString(36).slice(-8)
       const hashedPassword = await hash(tempPassword, 10)
 
+      console.log("💾 [System] Starting DB Transaction...");
       const result = await prisma.$transaction(async (tx) => {
-        const user = await tx.user.create({
-          data: { email, password: hashedPassword, role: 'TENANT' }
-        })
+        let user = await tx.user.findUnique({ where: { email } })
+        if (user) {
+          user = await tx.user.update({ where: { id: user.id }, data: { isActive: true, role: 'TENANT' } })
+        } else {
+          user = await tx.user.create({ data: { email, password: hashedPassword, role: 'TENANT' } })
+        }
 
-        const tenant = await tx.tenant.create({
-          data: {
-            userId: user.id,
-            firstName, lastName, phone, nationalId,
-            idCardUrl // บันทึก Path รูป
-          }
-        })
+        const tenant = await tx.tenant.upsert({
+          where: { nationalId },
+          update: { firstName, lastName, phone, idCardUrl, userId: user.id },
+          create: { userId: user.id, firstName, lastName, phone, nationalId, idCardUrl }
+        });
 
         await tx.lease.create({
           data: {
             roomId,
             tenantId: tenant.id,
-            startDate: new Date(startDate),
-            agreedBaseRent: Number(agreedBaseRent || room.pricePerMonth),
+            startDate: startDate ? new Date(startDate) : new Date(),
+            endDate: endDate ? new Date(endDate) : null,
+            contractUrl,
+            agreedBaseRent: rentVal,
             status: 'ACTIVE',
           }
         })
 
         const monthLabel = new Date().toISOString().slice(0, 7)
-        await tx.meterReading.createMany({
-          data: [
-            { roomId, month: monthLabel, utilityType: 'ELECTRICITY', previousValue: Number(initialElectricity || 0), currentValue: Number(initialElectricity || 0), usage: 0, rateAtTime: 8 },
-            { roomId, month: monthLabel, utilityType: 'WATER', previousValue: Number(initialWater || 0), currentValue: Number(initialWater || 0), usage: 0, rateAtTime: 20 },
-          ]
-        })
+        const meters = [
+          { type: 'ELECTRICITY' as const, val: elecVal, rate: 8 },
+          { type: 'WATER' as const, val: waterVal, rate: 20 }
+        ]
 
-        await tx.room.update({
-          where: { id: roomId },
-          data: { status: 'OCCUPIED' }
-        })
+        for (const m of meters) {
+          await tx.meterReading.upsert({
+            where: { roomId_month_utilityType: { roomId, month: monthLabel, utilityType: m.type } },
+            update: { previousValue: m.val, currentValue: m.val },
+            create: { 
+              roomId, 
+              month: monthLabel, 
+              utilityType: m.type, 
+              previousValue: m.val, 
+              currentValue: m.val, 
+              usage: 0, 
+              rateAtTime: m.rate 
+            }
+          })
+        }
+
+        await tx.room.update({ where: { id: roomId }, data: { status: 'OCCUPIED' } })
 
         return { tempPassword }
       })
 
       return { success: true, tempPassword: result.tempPassword }
-    } catch (error) {
-      console.error("Registration Error:", error)
+
+    } catch (error: any) {
+      console.error("🚨 [Critical Error] Move-in Failed:", error.message);
       set.status = 500
-      return { error: 'Database error. Check if Email or ID is duplicate.' }
+      return { error: `Registration failed: ${error.message}` }
     }
-  }, {
-    // ✅ หัวใจสำคัญ: ใช้ t.Any() เพื่อข้ามด่านตรวจ 422
-    body: t.Any() 
-  })
+  }, { body: t.Any() })
   
   // Update tenant
   .put('/:id', async ({ params, body }) => {

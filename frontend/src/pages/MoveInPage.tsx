@@ -27,6 +27,9 @@ export default function MoveInPage() {
   const [initElec, setInitElec] = useState("0")
   const [initWater, setInitWater] = useState("0")
   const [idFile, setIdFile] = useState(null)
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0])
+  const [endDate, setEndDate] = useState("")
+  const [contractFile, setContractFile] = useState(null)
 
   useEffect(() => { loadAvailableRooms() }, [])
 
@@ -41,6 +44,7 @@ export default function MoveInPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!idFile) return toast.error("Please upload ID image")
+    if (!contractFile) return toast.error("Please upload contract file")
     
     setSubmitting(true)
     try {
@@ -48,17 +52,19 @@ export default function MoveInPage() {
       
       const formData = new FormData()
       formData.append('email', email)
-      formData.append('firstName', nameParts[0])
-      formData.append('lastName', nameParts.slice(1).join(" ") || "-")
+      formData.append('firstName', name.split(' ')[0])
+      formData.append('lastName', name.split(' ').slice(1).join(' ') || '-')
       formData.append('phone', phone)
       formData.append('nationalId', nationalId)
       formData.append('roomId', selectedRoom)
-      formData.append('startDate', new Date().toISOString())
+      formData.append('startDate', startDate)
+      formData.append('endDate', endDate)
+      formData.append('idCardFile', idFile)
+      formData.append('contractFile', contractFile)
       formData.append('agreedBaseRent', String(rent || "0"))
       formData.append('initialElectricity', String(initElec || "0"))
       formData.append('initialWater', String(initWater || "0"))
-      formData.append('idCardFile', idFile)
-
+      
       const res = await api.tenants.create(formData)
       
       if (res.error) throw new Error(res.error)
@@ -137,9 +143,29 @@ export default function MoveInPage() {
               <Label>Monthly Rent (THB)</Label>
               <Input type="number" required value={rent} onChange={e => setRent(e.target.value)} className="text-xl font-bold text-emerald-600" />
             </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Contract Start Date</Label>
+                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contract End Date (Optional)</Label>
+                    <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                  </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2"><Label className="flex gap-1 text-xs"><Zap className="h-3 w-3" /> Initial Electric</Label><Input type="number" value={initElec} onChange={e => setInitElec(e.target.value)} /></div>
               <div className="space-y-2"><Label className="flex gap-1 text-xs"><Droplets className="h-3 w-3" /> Initial Water</Label><Input type="number" value={initWater} onChange={e => setInitWater(e.target.value)} /></div>
+            </div>
+            <div className="space-y-2">
+              <Label>Signed Lease Agreement (PDF/Image)</Label>
+              <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer relative hover:bg-secondary/50">
+                <input type="file" className="absolute inset-0 opacity-0" onChange={e => setContractFile(e.target.files[0])} />
+                <FileText className="mx-auto mb-2 text-muted-foreground h-5 w-5" />
+                <p className="text-xs font-medium">{contractFile ? contractFile.name : "Click to upload Signed Contract"}</p>
+              </div>
             </div>
           </Card>
           <Button type="submit" size="lg" className="w-full h-14 text-lg font-bold shadow-md" disabled={submitting}>

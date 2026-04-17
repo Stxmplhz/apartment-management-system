@@ -79,6 +79,7 @@ model Lease {
   
   startDate      DateTime
   endDate        DateTime?
+  contractUrl    String?
   agreedBaseRent Float
   status         LeaseStatus @default(ACTIVE)
   

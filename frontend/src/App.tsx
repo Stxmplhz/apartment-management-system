@@ -12,6 +12,7 @@ import PaymentsPage from './pages/PaymentsPage'
 import TenantDashboard from './pages/TenantDashboard'
 import MaintenancePage from './pages/MaintenancePage'
 import UserManagementPage from './pages/UserManagementPage'
+import LeaseManagementPage from './pages/LeaseManagementPage'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="invoices" element={<InvoicesPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="users" element={<UserManagementPage />} />
+            <Route path="leases" element={<LeaseManagementPage />} />
           </Route>
 
           {/* Tenant Only */}

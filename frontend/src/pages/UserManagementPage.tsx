@@ -10,6 +10,7 @@ import {
   Trash2, Key, X, Search, Eye, Phone, Fingerprint, Image as ImageIcon 
 } from "lucide-react"
 import { toast } from "sonner"
+import { getImageUrl } from '@/lib/utils'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
@@ -147,22 +148,21 @@ export default function UserManagementPage() {
                   <p className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
                     <ImageIcon className="h-3 w-3" /> ID Card Document
                   </p>
-                  <div className="border rounded-xl overflow-hidden bg-secondary/20">
+                  <div className="border rounded-xl overflow-hidden bg-secondary/20 group relative">
                     <img 
-                      src={`${API_URL}${selectedUser.tenantProfile.idCardUrl}`} 
+                      src={getImageUrl(selectedUser.tenantProfile.idCardUrl)}
                       alt="ID Card" 
-                      className="w-full h-auto cursor-zoom-in hover:scale-105 transition-transform"
-                      onClick={() => window.open(`${API_URL}${selectedUser.tenantProfile.idCardUrl}`, '_blank')}
+                      className="w-full h-auto cursor-zoom-in hover:opacity-90 transition-all"
+                      onClick={() => window.open(getImageUrl(selectedUser.tenantProfile.idCardUrl), '_blank')}
                     />
+                    <div class Name="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity bg-black/20">
+                      <span className="bg-white/90 text-black text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">Click to view full size</span>
+                    </div>
                   </div>
                 </div>
               )}
               
             </div>
-
-            <Button variant="destructive" className="w-full h-12" onClick={() => toast.error("Coming Soon: Account suspension")}>
-               Suspend Account
-            </Button>
           </div>
         </div>
       )}

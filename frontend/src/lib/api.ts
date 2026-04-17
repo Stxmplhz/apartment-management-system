@@ -1,4 +1,4 @@
-import type { User, Room, Tenant, MeterReading, Invoice, Payment, MoveInRequest, MaintenanceRequest, Technician, AuthResponse, ApiSuccess } from './types'
+import type { User, Room, Tenant, MeterReading, Invoice, Payment, MaintenanceRequest, Technician, AuthResponse, ApiSuccess } from './types'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
 
@@ -14,11 +14,10 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers: {
-      // ✅ ถ้าเป็น FormData ห้ามตั้ง Content-Type เอง เดี๋ยว Browser จัดการ Boundary ให้
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...options?.headers,
     },
-    
+
     body: isFormData ? options.body : (options?.body ? JSON.stringify(options.body) : undefined),
   })  
   
@@ -96,6 +95,12 @@ export const api = {
       fetchApi<{ success: boolean }>(`/api/tenants/${id}`, { method: 'DELETE' }),
     resetPassword: (id: string) =>
       fetchApi<any>(`/api/tenants/${id}/reset-password`, { method: 'POST' }),
+  },
+
+  // Leases
+  leases: {
+    list: () => fetchApi<any[]>('/api/leases'),
+    terminate: (id: string) => fetchApi<any>(`/api/leases/${id}/terminate`, { method: 'POST' }),
   },
   
   // Meter Readings

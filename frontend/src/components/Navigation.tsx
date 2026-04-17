@@ -19,6 +19,7 @@ export function Navigation() {
       return [
         { href: "/", label: "Rooms", icon: Building2 },
         { href: "/move-in", label: "Move-in", icon: UserPlus },
+        { href: "/leases", label: "Leases", icon: FileText },
         { href: "/meter", label: "Meter", icon: Gauge },
         { href: "/invoices", label: "Invoices", icon: FileText },
         { href: "/payments", label: "Payments", icon: CreditCard },

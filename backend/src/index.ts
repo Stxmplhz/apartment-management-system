@@ -8,7 +8,7 @@ import { paymentRoutes } from './routes/payments'
 import { authRoutes } from './routes/auth'
 import { maintenanceRoutes } from './routes/maintenance'
 import { userRoutes } from './routes/users'
-import { staticPlugin } from '@elysiajs/static'
+import { leaseRoutes } from './routes/lease'
 
 const port = process.env.PORT || 3001
 
@@ -34,12 +34,12 @@ const app = new Elysia()
   .use(authRoutes)
   .use(roomRoutes)
   .use(tenantRoutes)
-  .use(staticPlugin({ assets: 'uploads', prefix: '/uploads' }))
   .use(userRoutes)
   .use(meterRoutes)
   .use(invoiceRoutes)
   .use(paymentRoutes)
   .use(maintenanceRoutes)
+  .use(leaseRoutes)
   .listen(port)
 
 console.log(`Server running at http://localhost:${port}`)

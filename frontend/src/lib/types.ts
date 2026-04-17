@@ -59,6 +59,7 @@ export interface Lease {
   tenant: Tenant
   startDate: string
   endDate?: string | null
+  contractUrl?: string | null
   agreedBaseRent: number
   status: LeaseStatus
   createdAt: string

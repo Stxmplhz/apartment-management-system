@@ -82,6 +82,7 @@ async function main() {
           lastName: 'Jaidee',
           phone: '081-234-5678',
           nationalId: '1234567890123',
+          idCardUrl: 'https://assets.brandinside.asia/uploads/2025/04/image2-11.jpg'
         }
       }
     },
@@ -116,6 +117,7 @@ async function main() {
           lastName: 'Rakdee',
           phone: '089-876-5432',
           nationalId: '9876543210987',
+          idCardUrl: 'https://www.ngernyindee.co.th/wp-content/uploads/2023/07/%E0%B8%9A%E0%B8%97%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A7%E0%B8%B4%E0%B8%98%E0%B8%B5%E0%B9%80%E0%B8%8B%E0%B9%87%E0%B8%99%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B8%A3%E0%B8%AD%E0%B8%87%E0%B8%AA%E0%B8%B3%E0%B9%80%E0%B8%99%E0%B8%B2%E0%B8%9A%E0%B8%B1%E0%B8%95%E0%B8%A3%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B2%E0%B8%8A%E0%B8%99-3-1024x635.png'
         }
       }
     },
@@ -150,6 +152,7 @@ async function main() {
           lastName: 'Sukjai',
           phone: '062-111-2222',
           nationalId: '1111222233334',
+          idCardUrl: 'https://image.mfa.go.th/mfa/0/91fPdh6NtO/Consular-Services/%E0%B8%AB%E0%B8%99%E0%B9%89%E0%B8%B2%E0%B9%81%E0%B8%A3%E0%B8%81%E0%B8%9A%E0%B8%A3%E0%B8%B4%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%81%E0%B8%87%E0%B8%AA%E0%B8%B8%E0%B8%A5/Thai-ID.png'
         }
       }
     },

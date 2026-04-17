@@ -11,6 +11,7 @@ import { Wrench, Loader2, Upload, X } from 'lucide-react'
 import type { MaintenanceRequest } from '@/lib/types'
 import { toast } from 'sonner'
 import { getImageUrl } from '@/lib/utils'
+
 export default function MaintenancePage() {
   const { user } = useAuth()
   const userIsAdmin = user?.role === 'ADMIN'
