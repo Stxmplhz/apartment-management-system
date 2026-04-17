@@ -93,9 +93,11 @@ async function main() {
     data: {
       roomId: rooms[0].id,
       tenantId: tenant1User.tenantProfile!.id,
-      startDate: new Date('2024-01-15'),
+      startDate: new Date('2026-02-15'),
+      endDate: new Date('2026-08-15'),
       agreedBaseRent: 5000,
       status: LeaseStatus.ACTIVE,
+      contractUrl: 'https://signaturely.com/wp-content/uploads/2020/06/rental-_agreement_template1.jpg'
     }
   })
 
@@ -129,8 +131,10 @@ async function main() {
       roomId: rooms[1].id,
       tenantId: tenant2User.tenantProfile!.id,
       startDate: new Date('2024-02-01'),
+      endDate: new Date('2026-07-31'),
       agreedBaseRent: 5000,
       status: LeaseStatus.ACTIVE,
+      contractUrl: 'https://signaturely.com/wp-content/uploads/2020/06/rental-_agreement_template1.jpg'
     }
   })
 
@@ -163,9 +167,11 @@ async function main() {
     data: {
       roomId: rooms[3].id,
       tenantId: tenant3User.tenantProfile!.id,
-      startDate: new Date('2024-03-01'),
+      startDate: new Date('2026-03-01'),
+      endDate: new Date('2027-03-31'),
       agreedBaseRent: 5500,
       status: LeaseStatus.ACTIVE,
+      contractUrl: 'https://signaturely.com/wp-content/uploads/2020/06/rental-_agreement_template1.jpg'
     }
   })
 
@@ -208,43 +214,43 @@ async function main() {
   // --- Create Invoices (linked to Lease) ---
   const invoice1 = await prisma.invoice.create({
     data: {
-      invoiceNumber: 'INV-2024-03-101',
+      invoiceNumber: 'INV-2026-04-101',
       leaseId: lease1.id,
-      month: 'March 2024',
+      month: 'April 2024',
       baseRent: 5000,
       electricityCost: 1040, // 130 * 8
       waterCost: 240, // 12 * 20
       totalAmount: 6280,
       status: InvoiceStatus.UNPAID,
-      dueDate: new Date('2024-03-05'),
+      dueDate: new Date('2026-05-31'),
     }
   })
 
   const invoice2 = await prisma.invoice.create({
     data: {
-      invoiceNumber: 'INV-2024-03-102',
+      invoiceNumber: 'INV-2026-04-102',
       leaseId: lease2.id,
-      month: 'March 2024',
+      month: 'April 2026',
       baseRent: 5000,
       electricityCost: 1440, // 180 * 8
       waterCost: 400, // 20 * 20
       totalAmount: 6840,
       status: InvoiceStatus.PENDING_VERIFY,
-      dueDate: new Date('2024-03-05'),
+      dueDate: new Date('2026-05-31'),
     }
   })
 
   const invoice3 = await prisma.invoice.create({
     data: {
-      invoiceNumber: 'INV-2024-03-201',
+      invoiceNumber: 'INV-2026-04-201',
       leaseId: lease3.id,
-      month: 'March 2024',
+      month: 'April 2026',
       baseRent: 5500,
       electricityCost: 960, // 120 * 8
       waterCost: 300, // 15 * 20
       totalAmount: 6760,
       status: InvoiceStatus.PAID,
-      dueDate: new Date('2024-03-05'),
+      dueDate: new Date('2026-05-31'),
     }
   })
 
@@ -268,7 +274,7 @@ async function main() {
       amount: 6760,
       slipUrl: 'https://pattaya-pages.com/wp-content/uploads/2022/05/Screenshot_20220527-150835.jpg',
       status: PaymentStatus.PAID,
-      verifiedAt: new Date('2024-03-03'),
+      verifiedAt: new Date('2026-04-03'),
     }
   })
 

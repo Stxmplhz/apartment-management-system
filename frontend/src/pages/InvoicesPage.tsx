@@ -7,6 +7,8 @@ import { cn, formatCurrency } from "@/lib/utils"
 import { Download, CheckCircle, Zap, Droplets, FileText, Loader2, Upload } from "lucide-react"
 import type { Invoice, InvoiceStatus } from "@/lib/types"
 import { toast } from "sonner"
+import jsPDF from "jspdf"
+import autoTable from "jspdf-autotable"
 
 export default function InvoicesPage() {
   const { user } = useAuth()
@@ -58,34 +60,75 @@ export default function InvoicesPage() {
     }
   }
 
-  const handleDownload = (invoice: Invoice) => {
-    const content = `
-INVOICE - ${invoice.month}
-================================
-Invoice #: ${invoice.invoiceNumber}
-Room: ${invoice.room?.number ?? 'N/A'}
-Tenant: ${invoice.tenantName}
-
-CHARGES
---------------------------------
-Base Rent:          ${formatCurrency(invoice.baseRent).padStart(12)}
-Electricity:        ${formatCurrency(invoice.electricityCost).padStart(12)}
-  (${invoice.electricityUsage} kWh)
-Water:              ${formatCurrency(invoice.waterCost).padStart(12)}
-  (${invoice.waterUsage} units)
---------------------------------
-TOTAL:              ${formatCurrency(invoice.totalAmount).padStart(12)}
-================================
-    `.trim()
+  const handleDownload = (invoice: any) => {
+    const doc = new jsPDF();
     
-    const blob = new Blob([content], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `invoice-${invoice.room?.number ?? 'unknown'}-${invoice.month.replace(' ', '-')}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+    const formatPDFCurrency = (amount: number) => {
+      return `THB ${new Intl.NumberFormat('th-TH').format(amount || 0)}`;
+    };
+
+    const lease = invoice.lease;
+    const tenant = lease?.tenant;
+    const room = lease?.room;
+
+    const tName = tenant ? `${tenant.firstName} ${tenant.lastName}` : "Unknown Tenant";
+    const rNum = room?.number || "N/A";
+    const invNo = invoice.invoiceNumber || invoice.id?.slice(-8);
+
+    // 1. Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("INVOICE", 105, 20, { align: "center" });
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Invoice No: ${invNo}`, 14, 35);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 40);
+    doc.text(`Billing Month: ${invoice.month || "N/A"}`, 14, 45);
+
+    // 2. Tenant Info
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Tenant Information:", 14, 60);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Name: ${tName}`, 14, 67);
+    doc.text(`Room: Room ${rNum}`, 14, 72);
+
+    // Table 
+    const elecUsage = invoice.electricityUsage || 0;
+    const waterUsage = invoice.waterUsage || 0;
+
+    const tableData = [
+      ["Base Rent", "-", formatPDFCurrency(invoice.baseRent)],
+      ["Electricity", `${elecUsage} kWh`, formatPDFCurrency(invoice.electricityCost)],
+      ["Water", `${waterUsage} units`, formatPDFCurrency(invoice.waterCost)],
+    ];
+
+    autoTable(doc, {
+      startY: 80,
+      head: [["Description", "Details", "Amount"]],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [37, 99, 235], fontStyle: 'bold' },
+      styles: { font: "helvetica" }
+    });
+
+    // 4. Summary
+    // @ts-ignore
+    const finalY = (doc as any).lastAutoTable.finalY + 15;
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Total Amount: ${formatPDFCurrency(invoice.totalAmount)}`, 196, finalY, { align: "right" });
+
+    // 5. Footer
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.text("Thank you for your stay!", 105, finalY + 25, { align: "center" });
+
+    doc.save(`Invoice-${rNum}-${invoice.month?.replace(/\s+/g, '-') || 'file'}.pdf`);
+  };
 
   const filters: { value: 'all' | InvoiceStatus; label: string; count: number }[] = [
     { value: 'all', label: 'All', count: stats.total },
