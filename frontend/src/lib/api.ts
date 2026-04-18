@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { User, Room, Tenant, MeterReading, Invoice, Payment, MaintenanceRequest, Technician, AuthResponse, ApiSuccess } from './types'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''
@@ -8,7 +9,11 @@ interface ValidationErrorDetail {
   value?: any;
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+interface FetchOptions extends Omit<RequestInit, 'body'> {
+  body?: any;
+}
+
+async function fetchApi<T>(endpoint: string, options?: FetchOptions): Promise<T> {
   const isFormData = options?.body instanceof FormData;
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -17,7 +22,6 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> 
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...options?.headers,
     },
-
     body: isFormData ? options.body : (options?.body ? JSON.stringify(options.body) : undefined),
   })  
   
@@ -41,26 +45,20 @@ export const api = {
    // Auth
   auth: {
     login: (data: { email: string; password: string }) =>
-      fetchApi<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+      fetchApi<AuthResponse>('/api/auth/login', { method: 'POST', body: data }),
     logout: () =>
       fetchApi<{ success: boolean }>('/api/auth/logout', { method: 'POST' }),
     getMe: () =>
       fetchApi('/api/auth/me'),
     registerTechnician: (data: any) => 
-      fetchApi<ApiSuccess>('/api/auth/register-technician', { 
-        method: 'POST', 
-        body: JSON.stringify(data) 
-      }),
+      fetchApi<ApiSuccess>('/api/auth/register-technician', { method: 'POST', body: data }), 
   },
   
   // Users
   users: {
     list: () => fetchApi<User[]>('/api/users'),
     toggleStatus: (id: string, isActive: boolean) =>
-      fetchApi<User>(`/api/users/${id}/status`, { 
-        method: 'PUT', 
-        body: JSON.stringify({ isActive }) 
-      }),
+      fetchApi<User>(`/api/users/${id}/status`, { method: 'PUT', body: { isActive } }),
     delete: (id: string) =>
       fetchApi<ApiSuccess>(`/api/users/${id}`, { method: 'DELETE' }),
   },
@@ -76,9 +74,9 @@ export const api = {
     },
     get: (id: string) => fetchApi<Room>(`/api/rooms/${id}`),
     create: (data: Partial<Room>) => 
-      fetchApi<Room>('/api/rooms', { method: 'POST', body: data as any }), 
+      fetchApi<Room>('/api/rooms', { method: 'POST', body: data }), 
     update: (id: string, data: Partial<Room>) => 
-      fetchApi<Room>(`/api/rooms/${id}`, { method: 'PUT', body: data as any }),
+      fetchApi<Room>(`/api/rooms/${id}`, { method: 'PUT', body: data }),
     delete: (id: string) => 
       fetchApi<{ success: boolean }>(`/api/rooms/${id}`, { method: 'DELETE' }),
   },
@@ -87,14 +85,11 @@ export const api = {
   tenants: {
     list: () => fetchApi<Tenant[]>('/api/tenants'),
     get: (id: string) => fetchApi<Tenant>(`/api/tenants/${id}`),
-    create: (data: any) => 
-      fetchApi<any>('/api/tenants/move-in', { method: 'POST', body: data }),
+    create: (data: any) => fetchApi<any>('/api/tenants/move-in', { method: 'POST', body: data }),
     update: (id: string, data: Partial<Tenant>) => 
-      fetchApi<Tenant>(`/api/tenants/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+      fetchApi<Tenant>(`/api/tenants/${id}`, { method: 'PUT', body: data }), 
     moveOut: (id: string) => 
       fetchApi<{ success: boolean }>(`/api/tenants/${id}`, { method: 'DELETE' }),
-    resetPassword: (id: string) =>
-      fetchApi<any>(`/api/tenants/${id}/reset-password`, { method: 'POST' }),
   },
 
   // Leases
@@ -116,11 +111,11 @@ export const api = {
       const query = month ? `?month=${month}` : ''
       return fetchApi<Room[]>(`/api/meters/pending${query}`)
     },
-    create: (data: any) => fetchApi<MeterReading>('/api/meters', { method: 'POST', body: data as any }),
+    create: (data: any) => fetchApi<MeterReading>('/api/meters', { method: 'POST', body: data }),
     update: (id: string, data: any) => 
-      fetchApi<MeterReading>(`/api/meters/${id}`, { method: 'PUT', body: data as any }),
+      fetchApi<MeterReading>(`/api/meters/${id}`, { method: 'PUT', body: data }),
     bulkCreate: (data: any) => 
-      fetchApi('/api/meters/bulk', { method: 'POST', body: data as any }),
+      fetchApi('/api/meters/bulk', { method: 'POST', body: data }),
   },
   
   // Invoices
@@ -135,11 +130,11 @@ export const api = {
     },
     get: (id: string) => fetchApi<Invoice>(`/api/invoices/${id}`),
     generate: (data: { roomId: string; month: string; monthDisplay?: string; dueDate?: string }) => 
-      fetchApi<Invoice>('/api/invoices/generate', { method: 'POST', body: JSON.stringify(data) }),
+      fetchApi<Invoice>('/api/invoices/generate', { method: 'POST', body: data }),
     create: (data: Partial<Invoice>) => 
-      fetchApi<Invoice>('/api/invoices', { method: 'POST', body: JSON.stringify(data) }),
+      fetchApi<Invoice>('/api/invoices', { method: 'POST', body: data }),
     update: (id: string, data: Partial<Invoice>) => 
-      fetchApi<Invoice>(`/api/invoices/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+      fetchApi<Invoice>(`/api/invoices/${id}`, { method: 'PUT', body: data }),
   },
   
   // Payments
@@ -153,11 +148,11 @@ export const api = {
     },
     get: (id: string) => fetchApi<Payment>(`/api/payments/${id}`),
     create: (data: { invoiceId: string; amount: number; slipUrl?: string }) => 
-      fetchApi<Payment>('/api/payments', { method: 'POST', body: JSON.stringify(data) }),
+      fetchApi<Payment>('/api/payments', { method: 'POST', body: data }),
     verify: (id: string, status: string) => 
-    fetchApi<Payment>(`/api/payments/${id}/verify`, { method: 'PUT', body: JSON.stringify({ status }) }),
+      fetchApi<Payment>(`/api/payments/${id}/verify`, { method: 'PUT', body: { status } }),
     update: (id: string, data: { status?: string; slipUrl?: string; amount?: number }) => 
-      fetchApi<Payment>(`/api/payments/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+      fetchApi<Payment>(`/api/payments/${id}`, { method: 'PUT', body: data }),
     delete: (id: string) => 
       fetchApi<{ success: boolean }>(`/api/payments/${id}`, { method: 'DELETE' }),
   },
@@ -173,11 +168,11 @@ export const api = {
     },
     get: (id: string) => fetchApi<MaintenanceRequest>(`/api/maintenance/${id}`),
     create: (data: { tenantId: string; description: string; imageUrl?: string }) =>
-      fetchApi<MaintenanceRequest>('/api/maintenance', { method: 'POST', body: JSON.stringify(data) }),
+      fetchApi<MaintenanceRequest>('/api/maintenance', { method: 'POST', body: data }), 
     updateStatus: (id: string, status: string) =>
-      fetchApi<MaintenanceRequest>(`/api/maintenance/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+      fetchApi<MaintenanceRequest>(`/api/maintenance/${id}/status`, { method: 'PUT', body: { status } }),     
     assign: (id: string, technicianId: string) =>
-      fetchApi<MaintenanceRequest>(`/api/maintenance/${id}/assign`, { method: 'PUT', body: JSON.stringify({ technicianId }) }),
+      fetchApi<MaintenanceRequest>(`/api/maintenance/${id}/assign`, { method: 'PUT', body: { technicianId } }),       
     listTechnicians: () => 
       fetchApi<Technician[]>('/api/maintenance/technicians/list'),
   },

@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { 
   Wrench, Loader2, Upload, X, Search, Calendar, 
   User, Home, Clock, CheckCircle2, AlertCircle, 
-  ArrowUpDown, Filter, ChevronRight, Layers, ImageIcon
+  ArrowUpDown, Filter, ChevronRight, Layers, ImageIcon, Maximize2
 } from 'lucide-react'
 import type { MaintenanceRequest } from '@/lib/types'
 import { toast } from 'sonner'
@@ -30,7 +30,8 @@ export default function MaintenancePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [floorFilter, setFloorFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("newest") // newest, oldest
+  const [sortBy, setSortBy] = useState("newest") 
+  const [expandedImage, setExpandedImage] = useState<string | null>(null)
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
@@ -218,20 +219,24 @@ export default function MaintenancePage() {
         {processedRequests.map(request => (
           <Card key={request.id} className="rounded-[2rem] border-none shadow-md bg-white overflow-hidden hover:shadow-xl transition-all group">
             <div className="flex flex-col lg:flex-row">
-              {/* Image Preview Left */}
-              {request.imageUrl ? (
-                <div className="lg:w-64 h-48 lg:h-auto overflow-hidden relative">
-                  <img src={getImageUrl(request.imageUrl)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-black/20" />
-                </div>
-              ) : (
-                <div className="lg:w-64 h-32 lg:h-auto bg-slate-100 flex flex-col items-center justify-center text-slate-300">
-                  <Wrench className="h-8 w-8 mb-2" />
-                  <span className="text-[10px] font-bold uppercase">No Photo</span>
-                </div>
-              )}
+              {/* Image Preview */}
+              <div className="lg:w-64 h-48 lg:h-auto overflow-hidden relative cursor-pointer" onClick={() => request.imageUrl && setExpandedImage(getImageUrl(request.imageUrl))}>
+                {request.imageUrl ? (
+                  <>
+                    <img src={getImageUrl(request.imageUrl)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                       <Maximize2 className="text-white h-6 w-6" />
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300">
+                    <Wrench className="h-8 w-8 mb-2" />
+                    <span className="text-[10px] font-bold uppercase">No Photo</span>
+                  </div>
+                )}
+              </div>
 
-              {/* Content Middle */}
+              {/* Content */}
               <div className="flex-1 p-6 space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
@@ -242,60 +247,32 @@ export default function MaintenancePage() {
                       <span className="flex items-center gap-1 text-xs font-bold"><Clock className="h-3 w-3" /> {new Date(request.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <span className={cn(
-                    "text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-sm border",
-                    getStatusColor(request.status)
-                  )}>
-                    {request.status}
-                  </span>
+                  <span className={cn("text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest", getStatusColor(request.status))}>{request.status}</span>
                 </div>
 
-                {/* Status Step Action Bar */}
+                {/* Workflow Actions */}
                 <div className="pt-2">
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                       <ArrowUpDown className="h-3 w-3" /> Workflow Actions
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {/* Workflow Buttons based on current status */}
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-wrap gap-2">
                       {userIsAdmin && request.status === 'OPEN' && (
-                        <Button size="sm" className="bg-blue-600 rounded-lg font-bold" onClick={() => handleAssignTech(request.id)}>
-                          <Wrench className="h-3 w-3 mr-2" /> Assign Technician
+                        <Button size="sm" className="bg-blue-600 rounded-lg font-bold" onClick={() => {setSelectedRequestId(request.id); setIsAssignModalOpen(true);}}>
+                          Assign Technician
                         </Button>
                       )}
-
                       {(userIsAdmin || userIsTechnician) && request.status === 'ASSIGNED' && (
-                        <>
-                          <Button size="sm" variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'IN_PROGRESS')}>
-                            Start Repair <ChevronRight className="ml-1 h-3 w-3" />
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-red-500 rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'REJECTED')}>Reject</Button>
-                        </>
+                        <Button size="sm" className="bg-emerald-500 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'IN_PROGRESS')}>Start Repair</Button>
                       )}
-
                       {(userIsAdmin || userIsTechnician) && request.status === 'IN_PROGRESS' && (
-                        <Button size="sm" className="bg-emerald-600 rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'RESOLVED')}>
-                          Mark as Resolved <CheckCircle2 className="ml-2 h-3 w-3" />
-                        </Button>
+                        <Button size="sm" className="bg-emerald-600 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'RESOLVED')}>Mark Resolved</Button>
                       )}
-
                       {userIsAdmin && request.status === 'RESOLVED' && (
-                        <Button size="sm" variant="outline" className="bg-slate-900 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'CLOSED')}>
-                          Finalize & Close
-                        </Button>
+                        <Button size="sm" className="bg-slate-900 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'CLOSED')}>Close Job</Button>
                       )}
-
-                      {request.status === 'CLOSED' && (
-                        <p className="text-xs font-bold text-slate-400 italic">Job completed and archived.</p>
-                      )}
-                    </div>
                   </div>
                 </div>
 
-                {/* Technician Info */}
                 {request.technician && (
-                  <div className="flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 w-fit px-3 py-1.5 rounded-xl border border-blue-100">
-                    <Wrench className="h-3 w-3" /> Assigned: {request.technician.user?.email || 'General Technician'}
+                  <div className="text-xs font-bold text-blue-600 bg-blue-50 w-fit px-3 py-1.5 rounded-xl border border-blue-100">
+                    Technician: {request.technician.user?.email}
                   </div>
                 )}
               </div>
@@ -303,6 +280,16 @@ export default function MaintenancePage() {
           </Card>
         ))}
       </div>
+
+      {/* Image Lightbox */}
+      {expandedImage && (
+        <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setExpandedImage(null)}>
+           <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-white hover:bg-white/10">
+             <X className="h-8 w-8" />
+           </Button>
+           <img src={expandedImage} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95" />
+        </div>
+      )}
 
       {/* Empty State */}
       {processedRequests.length === 0 && (
@@ -387,3 +374,10 @@ function DetailItem({ icon, label, value, highlight = false }) {
     </div>
   )
 }
+
+/*
+1. 'OPEN' Status: Tenant has submitted a repair request -> The only button the Admin sees is "Assign Technician".
+2. Press 'Assign Button': Enter Technician ID -> Status will automatically change to ASSIGNED (according to the Stamp backend logic).
+3. 'ASSIGNED' Status: Once the technician accepts the job, the "Update Status" button will appear, changing to IN_PROGRESS.
+4. Final Status: When the repair is complete, it changes to RESOLVED, and the Admin closes the job as CLOSED.
+*/
