@@ -127,17 +127,23 @@ export const roomRoutes = new Elysia({ prefix: '/api/rooms' })
   
   // Delete room
   .delete('/:id', async ({ params }) => {
-    // Check if room has active lease
-    const activeLease = await prisma.lease.findFirst({
-      where: { roomId: params.id, status: 'ACTIVE' }
-    })
-    
-    if (activeLease) {
-      return { error: 'Cannot delete room with active lease' }
+    try {
+      const activeLease = await prisma.lease.findFirst({
+        where: { roomId: params.id, status: 'ACTIVE' }
+      })
+      
+      if (activeLease) {
+        return { error: 'Cannot delete room with active lease' }
+      }
+
+      await prisma.room.delete({
+        where: { id: params.id },
+      })
+      
+      return { success: true }
+    } catch (error) {
+      return { 
+        error: 'Cannot delete room because it has historical data (Invoices/Meter readings). Please set status to MAINTENANCE instead.' 
+      }
     }
-    
-    await prisma.room.delete({
-      where: { id: params.id },
-    })
-    return { success: true }
   })
