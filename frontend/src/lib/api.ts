@@ -116,18 +116,11 @@ export const api = {
       const query = month ? `?month=${month}` : ''
       return fetchApi<Room[]>(`/api/meters/pending${query}`)
     },
-    create: (data: {
-      roomId: string
-      month: string
-      electricityPrevious: number
-      electricityCurrent: number
-      waterPrevious: number
-      waterCurrent: number
-    }) => fetchApi<MeterReading>('/api/meters', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<MeterReading>) => 
-      fetchApi<MeterReading>(`/api/meters/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    bulkCreate: (data: { roomId: string, month: string, electricity: any, water: any }) => 
-      fetchApi('/api/meters/bulk', { method: 'POST', body: JSON.stringify(data) }),
+    create: (data: any) => fetchApi<MeterReading>('/api/meters', { method: 'POST', body: data as any }),
+    update: (id: string, data: any) => 
+      fetchApi<MeterReading>(`/api/meters/${id}`, { method: 'PUT', body: data as any }),
+    bulkCreate: (data: any) => 
+      fetchApi('/api/meters/bulk', { method: 'POST', body: data as any }),
   },
   
   // Invoices
