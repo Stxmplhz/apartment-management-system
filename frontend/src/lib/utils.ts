@@ -45,6 +45,13 @@ export const formatDateEng = (dateStr: string) => {
     })
   }
 
+export const formatMonthName = (yyyymm: string) => {
+    if (!yyyymm) return '';
+    const [year, month] = yyyymm.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
+
 export const formatMonthForAPI = (isoMonth: string) => {
   if (!isoMonth) return undefined;
 
@@ -56,7 +63,6 @@ export const formatMonthForAPI = (isoMonth: string) => {
     return undefined;
   }
 }
-
 
 export const getImageUrl = (url: string | null | undefined): string => {
   if (!url) return ''; 

@@ -77,6 +77,7 @@ export default function MeterReadingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    // 1. เช็คว่ากรอกเลขผิดไหม (ห้ามน้อยกว่าเดือนก่อน)
     const invalidRooms = []
     occupiedRooms.forEach(room => {
       const data = meterData[room.id]
@@ -90,19 +91,42 @@ export default function MeterReadingPage() {
     })
 
     if (invalidRooms.length > 0) {
-      return toast.error(`Cannot save! Room ${invalidRooms.join(', ')} has a current reading lower than the previous reading.`, {
+      return toast.error(`Cannot save! Room ${invalidRooms.join(', ')} has an invalid reading.`, {
         duration: 5000,
         style: { background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }
       })
     }
 
+    // ✅ 2. หาเฉพาะ "ห้องที่ตัวเลขเปลี่ยนไปจากเดิม" (ไม่เหมาเซฟมั่วซั่วแล้ว)
+    const roomsToUpdate = occupiedRooms.filter(room => {
+      const data = meterData[room.id]
+      if (!data || data.electricity.current === "" || data.water.current === "") return false
+
+      // เอาค่าที่อยู่ในช่องกรอก ไปเทียบกับค่าที่โหลดมาจาก Database
+      const savedElec = room.recordedData?.electricity?.toString() || ""
+      const savedWater = room.recordedData?.water?.toString() || ""
+
+      const isElecChanged = data.electricity.current !== savedElec
+      const isWaterChanged = data.water.current !== savedWater
+
+      // ส่งเซฟเฉพาะ "ห้องที่ยังไม่เคยเซฟ" หรือ "ห้องที่แอดมินเพิ่งแก้ตัวเลขใหม่" เท่านั้น!
+      return (!room.isSaved) || isElecChanged || isWaterChanged
+    })
+
+    if (roomsToUpdate.length === 0) {
+      return toast.info("No changes detected. Everything is up to date.")
+    }
+
     setSubmitting(true)  
     try {
-      const promises = occupiedRooms.map(room => {
+      toast.loading(`Processing ${roomsToUpdate.length} room(s)...`, { id: 'save-toast' })
+      
+      // ✅ 3. ใช้ For...of Loop ยิง API ทีละห้อง (ป้องกัน Server 500 Error จากการยิงพร้อมกัน)
+      for (const room of roomsToUpdate) {
         const data = meterData[room.id]
-        if (!data || data.electricity.current === "" || data.water.current === "") return null
 
-        return api.meters.bulkCreate({
+        // 3.1 บันทึกมิเตอร์
+        await api.meters.bulkCreate({
           roomId: room.id,
           month: selectedMonth, 
           electricity: {
@@ -116,19 +140,25 @@ export default function MeterReadingPage() {
             rateAtTime: parseFloat(waterRate)
           }
         })
-      })
 
-      const finalPromises = promises.filter(Boolean)
-      if (finalPromises.length === 0) {
-        setSubmitting(false)
-        return toast.error("Please enter at least one reading")
+        // 3.2 สั่งสร้าง Invoice อัตโนมัติต่อทันที
+        try {
+          await api.invoices.generate({
+            roomId: room.id,
+            month: selectedMonth,
+            monthDisplay: selectedMonth,
+          })
+        } catch (err: any) {
+          // ถ้า Invoice เดือนนี้เคยสร้างไปแล้ว Backend จะเตะกลับมา เราก็แค่ข้ามไป ไม่ให้หน้าเว็บพัง
+          console.warn(`Invoice generation skipped for Room ${room.number}:`, err?.message || err);
+        }
       }
 
-      await Promise.all(finalPromises)
-      toast.success('All readings recorded and validated!')
-      loadData()
+      toast.success(`Successfully saved meters and generated invoices for ${roomsToUpdate.length} room(s)!`, { id: 'save-toast' })
+      loadData() 
     } catch (error) {
-      toast.error('Failed to save readings')
+      toast.error('An error occurred during the save process.', { id: 'save-toast' })
+      console.error(error)
     } finally {
       setSubmitting(false)
     }

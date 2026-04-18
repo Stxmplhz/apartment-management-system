@@ -139,8 +139,6 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
         baseRent,
         electricityCost,
         waterCost,
-        electricityUsage: elecReading.usage, 
-        waterUsage: waterReading.usage,
         totalAmount,
         status: 'UNPAID',
         dueDate: dueDate ? new Date(dueDate) : null,

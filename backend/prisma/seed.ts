@@ -215,7 +215,7 @@ async function main() {
     data: {
       invoiceNumber: 'INV-2026-04-101',
       leaseId: lease1.id,
-      month: 'April 2026',
+      month: '2026-04',
       baseRent: 5000,
       electricityCost: 1040, // 130 * 8
       waterCost: 240, // 12 * 20
@@ -229,7 +229,7 @@ async function main() {
     data: {
       invoiceNumber: 'INV-2026-04-102',
       leaseId: lease2.id,
-      month: 'April 2026',
+      month: '2026-04',
       baseRent: 5000,
       electricityCost: 1440, // 180 * 8
       waterCost: 400, // 20 * 20
@@ -243,7 +243,7 @@ async function main() {
     data: {
       invoiceNumber: 'INV-2026-04-201',
       leaseId: lease3.id,
-      month: 'April 2026',
+      month: '2026-04',
       baseRent: 5500,
       electricityCost: 960, // 120 * 8
       waterCost: 300, // 15 * 20

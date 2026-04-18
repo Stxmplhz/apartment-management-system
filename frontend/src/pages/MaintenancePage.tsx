@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import type { MaintenanceRequest } from '@/lib/types'
 import { toast } from 'sonner'
-import { cn, getImageUrl } from '@/lib/utils'
+import { cn, formatDateEng, getImageUrl } from '@/lib/utils'
 
 export default function MaintenancePage() {
   const { user } = useAuth()
@@ -235,7 +235,7 @@ export default function MaintenancePage() {
                     <div className="flex flex-wrap items-center gap-3 mt-2 text-slate-400">
                       <span className="flex items-center gap-1 text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg"><Home className="h-3 w-3" /> Room {request.room?.number}</span>
                       <span className="flex items-center gap-1 text-xs font-bold"><User className="h-3 w-3" /> {request.tenant?.firstName}</span>
-                      <span className="flex items-center gap-1 text-xs font-bold"><Clock className="h-3 w-3" /> {new Date(request.createdAt).toLocaleDateString()}</span>
+                      <span className="flex items-center gap-1 text-xs font-bold"><Clock className="h-3 w-3" /> {formatDateEng(request.createdAt)}</span>
                     </div>
                   </div>
                   <span className={cn("text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border shadow-sm", getStatusColor(request.status))}>{request.status}</span>
