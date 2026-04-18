@@ -1,16 +1,16 @@
 // @ts-nocheck
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react"
 import { useAuth } from '@/contexts/AuthContext'
-import { api } from '@/lib/api'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { api } from "@/lib/api"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from "@/components/ui/card"
 import { 
   Wrench, Loader2, Upload, X, Search, Calendar, 
   User, Home, Clock, CheckCircle2, AlertCircle, 
-  ArrowUpDown, Filter, ChevronRight, Layers, ImageIcon, Maximize2
+  ArrowUpDown, Filter, ChevronRight, Layers, ImageIcon, Maximize2, ExternalLink
 } from 'lucide-react'
 import type { MaintenanceRequest } from '@/lib/types'
 import { toast } from 'sonner'
@@ -131,7 +131,6 @@ export default function MaintenancePage() {
       {/* Filters & Sorters Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
-           {/* Status Tabs */}
            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl border border-slate-200/50">
             {['all', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => (
               <button
@@ -146,8 +145,6 @@ export default function MaintenancePage() {
               </button>
             ))}
           </div>
-
-          {/* Floor Filter */}
           <select 
             value={floorFilter}
             onChange={(e) => setFloorFilter(e.target.value)}
@@ -157,25 +154,9 @@ export default function MaintenancePage() {
             {uniqueFloors.map(f => <option key={f} value={f.toString()}>Floor {f}</option>)}
           </select>
         </div>
-
-        {/* Sort Sorter */}
         <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
-           <Button 
-            variant={sortBy === 'newest' ? 'secondary' : 'ghost'} 
-            size="sm" 
-            className="text-[10px] font-black rounded-lg h-7"
-            onClick={() => setSortBy('newest')}
-           >
-             LATEST
-           </Button>
-           <Button 
-            variant={sortBy === 'oldest' ? 'secondary' : 'ghost'} 
-            size="sm" 
-            className="text-[10px] font-black rounded-lg h-7"
-            onClick={() => setSortBy('oldest')}
-           >
-             OLDEST
-           </Button>
+           <Button variant={sortBy === 'newest' ? 'secondary' : 'ghost'} size="sm" className="text-[10px] font-black rounded-lg h-7" onClick={() => setSortBy('newest')}>LATEST</Button>
+           <Button variant={sortBy === 'oldest' ? 'secondary' : 'ghost'} size="sm" className="text-[10px] font-black rounded-lg h-7" onClick={() => setSortBy('oldest')}>OLDEST</Button>
         </div>
       </div>
 
@@ -219,19 +200,29 @@ export default function MaintenancePage() {
         {processedRequests.map(request => (
           <Card key={request.id} className="rounded-[2rem] border-none shadow-md bg-white overflow-hidden hover:shadow-xl transition-all group">
             <div className="flex flex-col lg:flex-row">
+              
               {/* Image Preview */}
-              <div className="lg:w-64 h-48 lg:h-auto overflow-hidden relative cursor-pointer" onClick={() => request.imageUrl && setExpandedImage(getImageUrl(request.imageUrl))}>
+              <div className="lg:w-64 h-48 lg:h-auto overflow-hidden relative">
                 {request.imageUrl ? (
-                  <>
-                    <img src={getImageUrl(request.imageUrl)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                  <a 
+                    href={getImageUrl(request.imageUrl)} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="block w-full h-full relative group cursor-zoom-in"
+                  >
+                    <img 
+                      src={getImageUrl(request.imageUrl)} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      alt="Maintenance Issue"
+                    />
                     <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                       <Maximize2 className="text-white h-6 w-6" />
+                       <ExternalLink className="text-white h-6 w-6" />
                     </div>
-                  </>
+                  </a>
                 ) : (
                   <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300">
                     <Wrench className="h-8 w-8 mb-2" />
-                    <span className="text-[10px] font-bold uppercase">No Photo</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">No Photo</span>
                   </div>
                 )}
               </div>
@@ -247,7 +238,7 @@ export default function MaintenancePage() {
                       <span className="flex items-center gap-1 text-xs font-bold"><Clock className="h-3 w-3" /> {new Date(request.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <span className={cn("text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest", getStatusColor(request.status))}>{request.status}</span>
+                  <span className={cn("text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border shadow-sm", getStatusColor(request.status))}>{request.status}</span>
                 </div>
 
                 {/* Workflow Actions */}
@@ -281,16 +272,6 @@ export default function MaintenancePage() {
         ))}
       </div>
 
-      {/* Image Lightbox */}
-      {expandedImage && (
-        <div className="fixed inset-0 z-[300] bg-black/90 flex items-center justify-center p-4 animate-in fade-in" onClick={() => setExpandedImage(null)}>
-           <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-white hover:bg-white/10">
-             <X className="h-8 w-8" />
-           </Button>
-           <img src={expandedImage} className="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95" />
-        </div>
-      )}
-
       {/* Empty State */}
       {processedRequests.length === 0 && (
         <div className="text-center py-32 bg-slate-50 border-2 border-dashed rounded-[3rem]">
@@ -299,7 +280,7 @@ export default function MaintenancePage() {
         </div>
       )}
 
-      {/* Assign Technician Modal (Styled like Details) */}
+      {/* Assign Technician Modal */}
       {isAssignModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
           <Card className="w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden border-none animate-in zoom-in-95">
@@ -334,12 +315,12 @@ export default function MaintenancePage() {
 
   function getStatusColor(status: string) {
     switch (status) {
-      case 'OPEN': return 'bg-amber-500/10 text-amber-600 border-amber-200'
-      case 'ASSIGNED': return 'bg-blue-500/10 text-blue-600 border-blue-200'
-      case 'IN_PROGRESS': return 'bg-purple-500/10 text-purple-600 border-purple-200'
-      case 'RESOLVED': return 'bg-emerald-500/10 text-emerald-600 border-emerald-200'
+      case 'OPEN': return 'bg-amber-100 text-amber-600 border-amber-200'
+      case 'ASSIGNED': return 'bg-blue-100 text-blue-600 border-blue-200'
+      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-600 border-purple-200'
+      case 'RESOLVED': return 'bg-emerald-100 text-emerald-600 border-emerald-200'
       case 'CLOSED': return 'bg-slate-100 text-slate-500 border-slate-200'
-      case 'REJECTED': return 'bg-red-500/10 text-red-600 border-red-200'
+      case 'REJECTED': return 'bg-red-100 text-red-600 border-red-200'
       default: return 'bg-slate-100 text-slate-600'
     }
   }
@@ -360,24 +341,3 @@ export default function MaintenancePage() {
     } catch (e) { toast.error('Submit failed') } finally { setSubmitting(false) }
   }
 }
-
-function DetailItem({ icon, label, value, highlight = false }) {
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:border-blue-200 transition-colors">
-      <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
-        {React.cloneElement(icon, { className: "h-4 w-4" })}
-      </div>
-      <div className="overflow-hidden">
-        <p className="text-[8px] uppercase font-black text-slate-400 tracking-tighter leading-none mb-1">{label}</p>
-        <p className={cn("text-xs font-bold truncate", highlight ? "text-blue-600" : "text-slate-700")}>{value || "N/A"}</p>
-      </div>
-    </div>
-  )
-}
-
-/*
-1. 'OPEN' Status: Tenant has submitted a repair request -> The only button the Admin sees is "Assign Technician".
-2. Press 'Assign Button': Enter Technician ID -> Status will automatically change to ASSIGNED (according to the Stamp backend logic).
-3. 'ASSIGNED' Status: Once the technician accepts the job, the "Update Status" button will appear, changing to IN_PROGRESS.
-4. Final Status: When the repair is complete, it changes to RESOLVED, and the Admin closes the job as CLOSED.
-*/

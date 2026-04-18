@@ -36,6 +36,15 @@ export function formatShortDate(date: string | Date | null | undefined): string 
   }).format(d);
 }
 
+export const formatDateEng = (dateStr: string) => {
+    if (!dateStr) return "N/A"
+    return new Date(dateStr).toLocaleDateString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
+  }
+
 export const formatMonthForAPI = (isoMonth: string) => {
   if (!isoMonth) return undefined;
 
@@ -47,6 +56,7 @@ export const formatMonthForAPI = (isoMonth: string) => {
     return undefined;
   }
 }
+
 
 export const getImageUrl = (url: string | null | undefined): string => {
   if (!url) return ''; 
