@@ -75,7 +75,6 @@ export default function LeaseManagementPage() {
       if (sortBy === "newest") return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
       if (sortBy === "oldest") return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
       if (sortBy === "expiring") {
-        // ดึงตัวที่ใกล้หมดอายุ (มี endDate) ขึ้นก่อน, พวกที่ไม่มี (Infinity) ไว้หลังสุด
         const dateA = a.endDate ? new Date(a.endDate).getTime() : Infinity
         const dateB = b.endDate ? new Date(b.endDate).getTime() : Infinity
         return dateA - dateB
@@ -106,7 +105,6 @@ export default function LeaseManagementPage() {
       {/* Filters & Sorters Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-2">
-           {/* Status Tabs */}
            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl border border-slate-200/50">
             {['all', 'ACTIVE', 'TERMINATED', 'COMPLETED'].map((status) => (
               <button
@@ -122,7 +120,6 @@ export default function LeaseManagementPage() {
             ))}
           </div>
 
-          {/* Floor Filter */}
           <select 
             value={floorFilter}
             onChange={(e) => setFloorFilter(e.target.value)}
@@ -133,7 +130,6 @@ export default function LeaseManagementPage() {
           </select>
         </div>
 
-        {/* Sort Sorter */}
         <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
            <select 
              value={sortBy} 
@@ -150,30 +146,55 @@ export default function LeaseManagementPage() {
 
       {/* List */}
       <div className="grid gap-4">
-        {processedLeases.map(lease => (
-          <Card key={lease.id} className="p-5 hover:shadow-xl transition-all border-none shadow-md bg-white rounded-[2rem]">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <div className="flex items-center gap-5">
-                <div className="h-16 w-16 rounded-[1.5rem] bg-blue-600 text-white flex flex-col items-center justify-center font-black">
-                   <span className="text-[10px] opacity-60 uppercase">Room</span>{lease.room.number}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-black text-xl">{lease.tenant.firstName} {lease.tenant.lastName}</p>
-                    <span className={cn("text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest", lease.status === 'ACTIVE' ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600')}>{lease.status}</span>
+        {processedLeases.map(lease => {
+          const isExpiringSoon = lease.endDate && new Date(lease.endDate).getTime() - new Date().getTime() < 30 * 24 * 60 * 60 * 1000;
+
+          return (
+            <Card key={lease.id} className={cn("p-5 hover:shadow-xl transition-all border shadow-md bg-white rounded-[2rem]", isExpiringSoon ? "border-red-200 bg-red-50/10" : "border-slate-100")}>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                
+                {/* 1. Room & Tenant Info */}
+                <div className="flex items-center gap-5">
+                  <div className="h-16 w-16 rounded-[1.5rem] bg-blue-600 text-white flex flex-col items-center justify-center font-black">
+                     <span className="text-[10px] opacity-60 uppercase">Room</span>{lease.room.number}
                   </div>
-                  <div className="flex items-center gap-4 mt-2 text-slate-500 text-xs font-bold">
-                    <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5 text-blue-500" /> {getLeaseAge(lease.startDate)}</span>
-                    <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-slate-400" /> {formatDateEng(lease.startDate)}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-black text-xl">{lease.tenant.firstName} {lease.tenant.lastName}</p>
+                      <span className={cn("text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-widest", lease.status === 'ACTIVE' ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-600')}>{lease.status}</span>
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 text-slate-500 text-xs font-bold">
+                      <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" /> ID: {lease.tenant.nationalId?.slice(-4)}</span>
+                      <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" /> {lease.tenant.phone}</span>
+                    </div>
                   </div>
                 </div>
+
+                {/* 2. Contract Dates (Start & End) */}
+                <div className="flex-1 max-w-sm hidden lg:block">
+                  <div className="grid grid-cols-2 gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                     <div>
+                       <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">Start Date</p>
+                       <p className="text-sm font-bold text-slate-700">{formatDateEng(lease.startDate)}</p>
+                     </div>
+                     <div>
+                       <p className={cn("text-[9px] font-black uppercase tracking-widest mb-1", isExpiringSoon && lease.status === 'ACTIVE' ? "text-red-500" : "text-slate-400")}>Expiring Date</p>
+                       <p className={cn("text-sm font-bold", isExpiringSoon && lease.status === 'ACTIVE' ? "text-red-600" : "text-slate-700")}>
+                         {lease.endDate ? formatDateEng(lease.endDate) : "Indefinite"}
+                       </p>
+                     </div>
+                  </div>
+                </div>
+
+                {/* 3. Action Buttons */}
+                <div className="flex items-center gap-3">
+                  <Button onClick={() => openDetail(lease)} className="rounded-2xl h-12 px-6 bg-slate-900 hover:bg-black font-bold whitespace-nowrap">View Contract</Button>
+                </div>
+
               </div>
-              <div className="flex items-center gap-3">
-                <Button onClick={() => openDetail(lease)} className="rounded-2xl h-12 px-6 bg-slate-900 hover:bg-black font-bold">View Contract</Button>
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          )
+        })}
       </div>
 
       {/* --- Detail Modal --- */}
