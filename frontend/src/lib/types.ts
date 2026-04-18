@@ -104,6 +104,7 @@ export interface Invoice {
   id: string
   invoiceNumber: string
   leaseId: string
+  lease?: Lease
   month: string
   baseRent: number
   electricityCost: number

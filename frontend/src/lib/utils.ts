@@ -36,6 +36,18 @@ export function formatShortDate(date: string | Date | null | undefined): string 
   }).format(d);
 }
 
+export const formatMonthForAPI = (isoMonth: string) => {
+  if (!isoMonth) return undefined;
+
+  try {
+    const [year, month] = isoMonth.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } catch (e) {
+    return undefined;
+  }
+}
+
 export const getImageUrl = (url: string | null | undefined): string => {
   if (!url) return ''; 
   

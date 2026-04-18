@@ -183,8 +183,7 @@ async function main() {
   console.log('Created 3 tenants with active leases')
 
   // --- Create Meter Readings (separate by utility type) ---
-  const currentMonth = '2024-03'
-
+  const currentMonth = '2026-04'
   // Room 101 meter readings
   await prisma.meterReading.createMany({
     data: [
@@ -216,7 +215,7 @@ async function main() {
     data: {
       invoiceNumber: 'INV-2026-04-101',
       leaseId: lease1.id,
-      month: 'April 2024',
+      month: 'April 2026',
       baseRent: 5000,
       electricityCost: 1040, // 130 * 8
       waterCost: 240, // 12 * 20

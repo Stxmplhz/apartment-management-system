@@ -76,9 +76,9 @@ export const api = {
     },
     get: (id: string) => fetchApi<Room>(`/api/rooms/${id}`),
     create: (data: Partial<Room>) => 
-      fetchApi<Room>('/api/rooms', { method: 'POST', body: JSON.stringify(data) }),
+      fetchApi<Room>('/api/rooms', { method: 'POST', body: data as any }), 
     update: (id: string, data: Partial<Room>) => 
-      fetchApi<Room>(`/api/rooms/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+      fetchApi<Room>(`/api/rooms/${id}`, { method: 'PUT', body: data as any }),
     delete: (id: string) => 
       fetchApi<{ success: boolean }>(`/api/rooms/${id}`, { method: 'DELETE' }),
   },
