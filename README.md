@@ -4,11 +4,12 @@ A comprehensive, enterprise-grade web application designed to streamline apartme
 
 ## KEY FEATURES
 
-- **🔐 Role-Based Access Control (RBAC):** Distinct dashboards for Admins, Tenants, and Technicians.
-- **🧾 Automated Billing & Invoicing:** Generate monthly utility bills (Water/Electricity) with PDF export.
-- **💳 Payment Verification:** Drag-and-drop slip upload for tenants and one-click approval for admins.
-- **🛠 Maintenance Workflow:** Track repair requests from submission to resolution.
-- **📊 Real-time Dashboard:** Monitor vacant rooms, overdue payments, and active maintenance jobs.
+- **🔐 Role-Based Access Control (RBAC):** Distinct interfaces and permissions for Admins, Tenants, and Technicians.
+- **🚪 Room & Lease Management:** Visual room directory to track vacant/occupied units, complete with a Move-in registration flow that handles tenant profiles, document uploads (ID/Contract), and temporary password generation.
+- **⚡ Utility & Billing System:** Monthly meter reading entry (Water/Electricity) with automatic usage validation, instant invoice generation, and downloadable PDF bills.
+- **💳 Payment Verification:** Drag-and-drop payment slip uploads for tenants, integrated with a straightforward Accept/Reject workflow for administrators.
+- **🛠 Maintenance Ticketing:** Tenants can report issues with photo attachments, while admins can assign specific technicians and track repair statuses (Open ➔ In Progress ➔ Resolved ➔ Closed).
+- **👥 User Administration:** Centralized control panel to view tenant profiles, manage system access, and register new technician accounts on the fly.
 
 ---
 
