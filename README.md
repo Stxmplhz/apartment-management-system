@@ -1,5 +1,17 @@
 # APARTMENT MANAGEMENT SYSTEM
 
+A comprehensive, enterprise-grade web application designed to streamline apartment complex operations. This system handles everything from tenant move-ins and monthly billing to maintenance requests and technician assignments.
+
+## KEY FEATURES
+
+- **🔐 Role-Based Access Control (RBAC):** Distinct dashboards for Admins, Tenants, and Technicians.
+- **🧾 Automated Billing & Invoicing:** Generate monthly utility bills (Water/Electricity) with PDF export.
+- **💳 Payment Verification:** Drag-and-drop slip upload for tenants and one-click approval for admins.
+- **🛠 Maintenance Workflow:** Track repair requests from submission to resolution.
+- **📊 Real-time Dashboard:** Monitor vacant rooms, overdue payments, and active maintenance jobs.
+
+---
+
 ## TECH STACK
 
 | Component | Technology |
