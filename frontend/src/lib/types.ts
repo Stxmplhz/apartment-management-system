@@ -28,6 +28,9 @@ export interface Technician {
   id: string
   userId: string
   user?: User
+  firstName: string  
+  lastName: string 
+  phone: string     
   expertise?: string
   assignedJobs?: MaintenanceRequest[]
   activeJobsCount?: number

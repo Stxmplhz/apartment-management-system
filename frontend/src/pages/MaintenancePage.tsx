@@ -1,106 +1,57 @@
-// @ts-nocheck
-import React, { useState, useEffect } from "react"
+import { useState } from "react"
 import { useAuth } from '@/contexts/AuthContext'
 import { api } from "@/lib/api"
+import { useMaintenance } from "@/hooks/useMaintenance"
+import { MaintenanceCard } from "@/components/features/maintenance/MaintenanceCard"
+import { MaintenanceFilterBar } from "@/components/features/maintenance/MaintenanceFilterBar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from "@/components/ui/card"
-import { 
-  Wrench, Loader2, Upload, X, Search, Calendar, 
-  User, Home, Clock, CheckCircle2, AlertCircle, 
-  ArrowUpDown, Filter, ChevronRight, Layers, ImageIcon, Maximize2, ExternalLink
-} from 'lucide-react'
-import type { MaintenanceRequest } from '@/lib/types'
+import { Wrench, Loader2, X, Search, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { cn, formatDateEng, getImageUrl } from '@/lib/utils'
 
 export default function MaintenancePage() {
   const { user } = useAuth()
-  const userIsAdmin = user?.role === 'ADMIN'
-  const userIsTechnician = user?.role === 'TECHNICIAN'
-  const userIsTenant = user?.role === 'TENANT'
-
-  const [requests, setRequests] = useState<MaintenanceRequest[]>([])
-  const [loading, setLoading] = useState(true)
+  const { processedRequests, loading, technicians, uniqueFloors, roles, filters, actions } = useMaintenance()
+  
+  // UI States
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [technicians, setTechnicians] = useState<any[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [floorFilter, setFloorFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("newest") 
-  const [expandedImage, setExpandedImage] = useState<string | null>(null)
-
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-
   const [description, setDescription] = useState('')  
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-
-  useEffect(() => {
-    loadRequests()
-    if (userIsAdmin) loadTechnicians()
-  }, [])
-
-  const loadRequests = async () => {
-    try {
-      setLoading(true)
-      const data = await api.maintenance.list()
-      setRequests(data)
-    } catch (error) { toast.error('Failed to load requests') } finally { setLoading(false) }
-  }
-
-  const loadTechnicians = async () => {
-    try {
-      const data = await api.maintenance.listTechnicians()
-      setTechnicians(data) 
-    } catch (error) { console.error(error) }
-  }
-
-  const processedRequests = requests
-    .filter(req => {
-      const matchesSearch = req.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            req.room?.number.includes(searchQuery)
-      const matchesStatus = statusFilter === "all" || req.status === statusFilter
-      const matchesFloor = floorFilter === "all" || req.room?.floor.toString() === floorFilter
-      return matchesSearch && matchesStatus && matchesFloor
-    })
-    .sort((a, b) => {
-      return sortBy === "newest" 
-        ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        : new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-    })
-
-  const uniqueFloors = [...new Set(requests.map(r => r.room?.floor))].filter(Boolean).sort()
-
-  const handleUpdateStatus = async (requestId: string, nextStatus: string) => {
-    try {
-      setLoading(true);
-      await api.maintenance.updateStatus(requestId, nextStatus);
-      toast.success(`Status updated to ${nextStatus}`);
-      await loadRequests();
-    } catch (error) { toast.error('Update failed'); } finally { setLoading(false); }
-  }
-
-  const handleAssignTech = (requestId: string) => {
-    setSelectedRequestId(requestId);
-    setIsAssignModalOpen(true);
-  };
+  
+  // Modal States
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
 
   const confirmAssign = async (techId: string) => {
     if (!selectedRequestId) return;
     try {
-      setLoading(true);
       await api.maintenance.assign(selectedRequestId, techId);
       toast.success('Technician assigned!');
       setIsAssignModalOpen(false); 
-      await loadRequests(); 
-    } catch (error) { toast.error('Assign failed'); } finally { setLoading(false); }
+      actions.loadRequests(); 
+    } catch (error) { toast.error('Assign failed'); }
   };
 
-  if (loading && requests.length === 0) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
+  const handleSubmitRequest = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!description.trim()) return toast.error('Please describe the issue')
+    try {
+      setSubmitting(true)
+      await api.maintenance.create({
+        tenantId: user?.id || '',
+        description: description.trim(),
+        imageUrl: imagePreview || undefined,
+      })
+      toast.success('Request sent!')
+      setDescription(''); setImagePreview(null); setShowForm(false)
+      actions.loadRequests()
+    } catch (e) { toast.error('Submit failed') } finally { setSubmitting(false) }
+  }
+
+  if (loading && processedRequests.length === 0) return <div className="flex justify-center py-20"><Loader2 className="animate-spin" /></div>
 
   return (
     <div className="space-y-6 pb-20">
@@ -116,11 +67,11 @@ export default function MaintenancePage() {
             <Input 
               placeholder="Search issue or room..." 
               className="pl-9 w-[220px] rounded-2xl bg-slate-50 border-none focus-visible:ring-blue-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filters.searchQuery}
+              onChange={(e) => filters.setSearchQuery(e.target.value)}
             />
           </div>
-          {userIsTenant && (
+          {roles.userIsTenant && (
             <Button onClick={() => setShowForm(!showForm)} className="rounded-2xl bg-blue-600 hover:bg-blue-700 font-bold">
               <Wrench className="h-4 w-4 mr-2" /> New Request
             </Button>
@@ -128,40 +79,10 @@ export default function MaintenancePage() {
         </div>
       </div>
 
-      {/* Filters & Sorters Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-           <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl border border-slate-200/50">
-            {['all', 'OPEN', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={cn(
-                  "px-4 py-1.5 text-[10px] font-black rounded-xl transition-all uppercase tracking-tighter",
-                  statusFilter === s ? "bg-white text-blue-600 shadow-sm scale-105" : "text-slate-500 hover:text-slate-900"
-                )}
-              >
-                {s === 'all' ? 'All Jobs' : s}
-              </button>
-            ))}
-          </div>
-          <select 
-            value={floorFilter}
-            onChange={(e) => setFloorFilter(e.target.value)}
-            className="h-9 px-4 rounded-xl bg-slate-100 border-none text-[10px] font-black uppercase text-slate-600 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-          >
-            <option value="all">All Floors</option>
-            {uniqueFloors.map(f => <option key={f} value={f.toString()}>Floor {f}</option>)}
-          </select>
-        </div>
-        <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
-           <Button variant={sortBy === 'newest' ? 'secondary' : 'ghost'} size="sm" className="text-[10px] font-black rounded-lg h-7" onClick={() => setSortBy('newest')}>LATEST</Button>
-           <Button variant={sortBy === 'oldest' ? 'secondary' : 'ghost'} size="sm" className="text-[10px] font-black rounded-lg h-7" onClick={() => setSortBy('oldest')}>OLDEST</Button>
-        </div>
-      </div>
+      <MaintenanceFilterBar filters={filters} uniqueFloors={uniqueFloors} />
 
-      {/* Tenant Form */}
-      {userIsTenant && showForm && (
+      {/* Tenant Request Form */}
+      {roles.userIsTenant && showForm && (
         <Card className="rounded-[2rem] border-none shadow-xl bg-blue-600 text-white overflow-hidden animate-in slide-in-from-top-4">
           <CardContent className="p-8 space-y-6">
             <h2 className="text-2xl font-black">What needs fixing?</h2>
@@ -195,84 +116,19 @@ export default function MaintenancePage() {
         </Card>
       )}
 
-      {/* Requests List */}
+      {/* List */}
       <div className="grid gap-6">
         {processedRequests.map(request => (
-          <Card key={request.id} className="rounded-[2rem] border-none shadow-md bg-white overflow-hidden hover:shadow-xl transition-all group">
-            <div className="flex flex-col lg:flex-row">
-              
-              {/* Image Preview */}
-              <div className="lg:w-64 h-48 lg:h-auto overflow-hidden relative">
-                {request.imageUrl ? (
-                  <a 
-                    href={getImageUrl(request.imageUrl)} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block w-full h-full relative group cursor-zoom-in"
-                  >
-                    <img 
-                      src={getImageUrl(request.imageUrl)} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      alt="Maintenance Issue"
-                    />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                       <ExternalLink className="text-white h-6 w-6" />
-                    </div>
-                  </a>
-                ) : (
-                  <div className="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-300">
-                    <Wrench className="h-8 w-8 mb-2" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest">No Photo</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-black text-slate-800 leading-tight">{request.description}</h3>
-                    <div className="flex flex-wrap items-center gap-3 mt-2 text-slate-400">
-                      <span className="flex items-center gap-1 text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded-lg"><Home className="h-3 w-3" /> Room {request.room?.number}</span>
-                      <span className="flex items-center gap-1 text-xs font-bold"><User className="h-3 w-3" /> {request.tenant?.firstName}</span>
-                      <span className="flex items-center gap-1 text-xs font-bold"><Clock className="h-3 w-3" /> {formatDateEng(request.createdAt)}</span>
-                    </div>
-                  </div>
-                  <span className={cn("text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest border shadow-sm", getStatusColor(request.status))}>{request.status}</span>
-                </div>
-
-                {/* Workflow Actions */}
-                <div className="pt-2">
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-wrap gap-2">
-                      {userIsAdmin && request.status === 'OPEN' && (
-                        <Button size="sm" className="bg-blue-600 rounded-lg font-bold" onClick={() => {setSelectedRequestId(request.id); setIsAssignModalOpen(true);}}>
-                          Assign Technician
-                        </Button>
-                      )}
-                      {(userIsAdmin || userIsTechnician) && request.status === 'ASSIGNED' && (
-                        <Button size="sm" className="bg-emerald-500 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'IN_PROGRESS')}>Start Repair</Button>
-                      )}
-                      {(userIsAdmin || userIsTechnician) && request.status === 'IN_PROGRESS' && (
-                        <Button size="sm" className="bg-emerald-600 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'RESOLVED')}>Mark Resolved</Button>
-                      )}
-                      {userIsAdmin && request.status === 'RESOLVED' && (
-                        <Button size="sm" className="bg-slate-900 text-white rounded-lg font-bold" onClick={() => handleUpdateStatus(request.id, 'CLOSED')}>Close Job</Button>
-                      )}
-                  </div>
-                </div>
-
-                {request.technician && (
-                  <div className="text-xs font-bold text-blue-600 bg-blue-50 w-fit px-3 py-1.5 rounded-xl border border-blue-100">
-                    Technician: {request.technician.user?.email}
-                  </div>
-                )}
-              </div>
-            </div>
-          </Card>
+          <MaintenanceCard 
+            key={request.id} 
+            request={request}
+            roles={roles}
+            onUpdateStatus={actions.handleUpdateStatus}
+            onAssign={(id: string) => { setSelectedRequestId(id); setIsAssignModalOpen(true); }}
+          />
         ))}
       </div>
 
-      {/* Empty State */}
       {processedRequests.length === 0 && (
         <div className="text-center py-32 bg-slate-50 border-2 border-dashed rounded-[3rem]">
           <Wrench className="h-12 w-12 text-slate-200 mx-auto mb-4" />
@@ -312,32 +168,4 @@ export default function MaintenancePage() {
       )}
     </div>
   )
-
-  function getStatusColor(status: string) {
-    switch (status) {
-      case 'OPEN': return 'bg-amber-100 text-amber-600 border-amber-200'
-      case 'ASSIGNED': return 'bg-blue-100 text-blue-600 border-blue-200'
-      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-600 border-purple-200'
-      case 'RESOLVED': return 'bg-emerald-100 text-emerald-600 border-emerald-200'
-      case 'CLOSED': return 'bg-slate-100 text-slate-500 border-slate-200'
-      case 'REJECTED': return 'bg-red-100 text-red-600 border-red-200'
-      default: return 'bg-slate-100 text-slate-600'
-    }
-  }
-
-  async function handleSubmitRequest(e: React.FormEvent) {
-    e.preventDefault()
-    if (!description.trim()) return toast.error('Please describe the issue')
-    try {
-      setSubmitting(true)
-      await api.maintenance.create({
-        tenantId: user?.id || '',
-        description: description.trim(),
-        imageUrl: imagePreview || undefined,
-      })
-      toast.success('Request sent!')
-      setDescription(''); setImagePreview(null); setShowForm(false)
-      loadRequests()
-    } catch (e) { toast.error('Submit failed') } finally { setSubmitting(false) }
-  }
 }

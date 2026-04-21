@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { User, Room, Tenant, MeterReading, Invoice, Payment, MaintenanceRequest, Technician, AuthResponse, ApiSuccess } from './types'
 
 const API_BASE = import.meta.env.VITE_API_URL || ''

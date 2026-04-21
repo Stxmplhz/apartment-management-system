@@ -45,6 +45,9 @@ async function main() {
       isActive: true,
       techProfile: {
         create: {
+          firstName: 'Para',
+          lastName: 'Nasri',
+          phone: '081-234-5678',
           expertise: 'Plumbing, Electrical'
         }
       }
