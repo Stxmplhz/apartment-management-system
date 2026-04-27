@@ -26,9 +26,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (savedToken && savedUser) {
       setToken(savedToken)
       try {
-        setUser(JSON.parse(savedUser))
+        const parsed = JSON.parse(savedUser)
+        setUser(parsed)
+        // Re-fetch profile in case it wasn't saved (e.g. old session)
+        if (!parsed.profile) {
+          fetch(`${import.meta.env.VITE_API_URL || ''}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${savedToken}` }
+          })
+            .then(r => r.json())
+            .then(data => {
+              if (data.profile) {
+                const updated = { ...parsed, profile: data.profile }
+                setUser(updated)
+                localStorage.setItem('auth_user', JSON.stringify(updated))
+              }
+            })
+            .catch(() => {})
+        }
       } catch {
-        // Invalid stored user data, clear it
         localStorage.removeItem('auth_user')
         localStorage.removeItem('auth_token')
       }
@@ -57,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: data.user.email,
         role: data.user.role,
         isActive: data.user.isActive,
+        profile: data.user.profile,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }

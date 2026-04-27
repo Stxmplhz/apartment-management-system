@@ -13,6 +13,7 @@ export interface User {
   email: string
   role: Role
   isActive: boolean
+  profile?: any
   createdAt: string
   updatedAt: string
 }

@@ -158,10 +158,11 @@ export const api = {
 
   // Maintenance
   maintenance: {
-    list: (params?: { status?: string; roomId?: string }) => {
+    list: (params?: { status?: string; roomId?: string; tenantId?: string }) => {
       const searchParams = new URLSearchParams()
       if (params?.status) searchParams.set('status', params.status)
       if (params?.roomId) searchParams.set('roomId', params.roomId)
+      if (params?.tenantId) searchParams.set('tenantId', params.tenantId)
       const query = searchParams.toString()
       return fetchApi<MaintenanceRequest[]>(`/api/maintenance${query ? `?${query}` : ''}`)
     },
