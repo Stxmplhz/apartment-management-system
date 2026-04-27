@@ -13,6 +13,8 @@ import TenantDashboard from './pages/TenantDashboard'
 import MaintenancePage from './pages/MaintenancePage'
 import UserManagementPage from './pages/UserManagementPage'
 import LeaseManagementPage from './pages/LeaseManagementPage'
+import TenantInvoicesPage from './pages/TenantInvoicesPage'
+import TenantMaintenancePage from './pages/TenantMaintenancePage'
 
 function App() {
   return (
@@ -35,7 +37,6 @@ function App() {
             <Route index element={<RoomDirectoryPage />} />
             <Route path="move-in" element={<MoveInPage />} />
             <Route path="meter" element={<MeterReadingPage />} />
-            <Route path="invoices" element={<InvoicesPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="users" element={<UserManagementPage />} />
             <Route path="leases" element={<LeaseManagementPage />} />
@@ -44,9 +45,16 @@ function App() {
           {/* Tenant Only */}
           <Route element={<ProtectedRoute allowedRoles={['TENANT']} />}>
             <Route path="dashboard" element={<TenantDashboard />} />
+            <Route path="my-invoices" element={<TenantInvoicesPage />} />
+            <Route path="my-maintenance" element={<TenantMaintenancePage />} />
           </Route>
 
-          {/* Maintenance Routes */}
+          {/* Admin Only: invoices + maintenance */}
+          <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+            <Route path="invoices" element={<InvoicesPage />} />
+          </Route>
+
+          {/* Shared: Admin + Technician */}
           <Route path="maintenance" element={<MaintenancePage />} />
         </Route>
 
