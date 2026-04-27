@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Lexend:wght@300;400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -39,7 +39,7 @@
     --text-secondary: #475569;
     --text-muted: #94A3B8;
     --sidebar-border: rgba(59,130,246,0.1);
-    --font-display: 'Syne', sans-serif;
+    --font-display: 'Lexend', sans-serif;
     --font-body: 'DM Sans', sans-serif;
   }
 }

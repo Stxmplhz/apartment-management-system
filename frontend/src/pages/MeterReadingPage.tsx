@@ -64,7 +64,7 @@ export default function MeterReadingPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Billing & Utilities</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Billing & Utilities</h1>
           <p className="text-xs text-muted-foreground mt-0.5">{filters.selectedMonth} billing cycle</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -91,7 +91,7 @@ export default function MeterReadingPage() {
       <form onSubmit={handleSaveAll}>
         <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Meter Readings</h2>
+            <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Meter Readings</h2>
             <Button type="submit" size="sm" disabled={submitting}
               className="h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-xs">
               {submitting ? <Loader2 className="animate-spin h-3.5 w-3.5 mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
@@ -132,7 +132,7 @@ export default function MeterReadingPage() {
                   return (
                     <tr key={room.id} className={cn("border-b border-border last:border-0 hover:bg-secondary/30 transition-colors", room.isSaved && "bg-emerald-500/5")}>
                       <td className="px-4 py-3">
-                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0" style={{ background: '#3b82f6' }}>
+                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0" style={{ background: '#3b82f6' }}>
                           {room.number}
                         </div>
                       </td>
@@ -191,7 +191,7 @@ export default function MeterReadingPage() {
       {/* Invoice Table */}
       <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Invoices — {filters.selectedMonth}</h2>
+          <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Invoices — {filters.selectedMonth}</h2>
           <span className="text-xs text-muted-foreground">{invoices.length} invoice(s)</span>
         </div>
         <div className="overflow-x-auto">
@@ -212,7 +212,7 @@ export default function MeterReadingPage() {
                 {invoices.map((inv) => (
                   <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-secondary/50 transition-colors">
                     <td className="px-5 py-3">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: '#3b82f6' }}>
+                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-medium text-white" style={{ background: '#3b82f6' }}>
                         {inv.lease?.room?.number ?? '—'}
                       </div>
                     </td>
@@ -232,7 +232,7 @@ export default function MeterReadingPage() {
                         <Droplets className="h-3 w-3 text-blue-500" />{formatCurrency(inv.waterCost)}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-sm font-bold text-foreground">{formatCurrency(inv.totalAmount)}</td>
+                    <td className="px-5 py-3 text-sm font-medium text-foreground">{formatCurrency(inv.totalAmount)}</td>
                     <td className="px-5 py-3">
                       <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full border", invStatusStyle[inv.status] ?? invStatusStyle.UNPAID)}>
                         {invStatusLabel[inv.status] ?? inv.status}

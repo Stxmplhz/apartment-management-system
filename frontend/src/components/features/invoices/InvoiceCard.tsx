@@ -29,9 +29,9 @@ export function InvoiceCard({ invoice, userRole, onMarkPaid, onOpenPay, isProces
       {/* Header */}
       <div className="px-5 py-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-blue-500 text-white flex flex-col items-center justify-center flex-shrink-0" style={{ fontFamily: 'Syne, sans-serif' }}>
+          <div className="h-9 w-9 rounded-lg bg-blue-500 text-white flex flex-col items-center justify-center flex-shrink-0" style={{ fontFamily: 'Lexend, sans-serif' }}>
             <span className="text-[8px] opacity-70 leading-none">Rm</span>
-            <span className="text-sm font-bold leading-tight">{invoice.lease?.room?.number}</span>
+            <span className="text-sm font-medium leading-tight">{invoice.lease?.room?.number}</span>
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">{invoice.lease?.tenant?.firstName} {invoice.lease?.tenant?.lastName}</p>
@@ -50,7 +50,7 @@ export function InvoiceCard({ invoice, userRole, onMarkPaid, onOpenPay, isProces
         <Row label={`Water (${waterUsage.toFixed(0)} m³)`} value={formatCurrency(invoice.waterCost)} icon={<Droplets className="h-3 w-3 text-blue-500" />} />
         <div className="pt-2 border-t border-border flex items-center justify-between">
           <span className="text-xs text-muted-foreground">Total Due</span>
-          <span className="text-lg font-bold text-blue-600" style={{ fontFamily: 'Syne, sans-serif' }}>{formatCurrency(invoice.totalAmount)}</span>
+          <span className="text-lg font-medium text-blue-600" style={{ fontFamily: 'Lexend, sans-serif' }}>{formatCurrency(invoice.totalAmount)}</span>
         </div>
       </div>
 

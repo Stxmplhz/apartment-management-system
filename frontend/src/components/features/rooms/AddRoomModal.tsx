@@ -34,7 +34,7 @@ export function AddRoomModal({ onClose, onSuccess, existingRooms }: { onClose: (
         <form onSubmit={handleSubmit}>
           {/* Header */}
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-            <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>New Unit</h2>
+            <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>New Unit</h2>
             <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>

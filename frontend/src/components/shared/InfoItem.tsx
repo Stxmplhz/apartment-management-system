@@ -7,7 +7,7 @@ export function InfoItem({ icon, label, value }: { icon: React.ReactElement, lab
         {React.cloneElement(icon, { className: "h-5 w-5 text-muted-foreground" })}
       </div>
       <div>
-        <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-0.5">{label}</p>
+        <p className="text-[10px] uppercase font-medium text-muted-foreground tracking-wider mb-0.5">{label}</p>
         <p className="text-sm font-semibold text-foreground">{value}</p>
       </div>
     </div>

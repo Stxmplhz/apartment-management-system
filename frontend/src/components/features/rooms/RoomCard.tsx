@@ -23,7 +23,7 @@ export function RoomCard({ room }: { room: Room }) {
 
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <h3 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{room.number}</h3>
+          <h3 className="text-xl font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>{room.number}</h3>
           <span className={cn("inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full", status.bg, status.text)}>
             <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
             {status.label}

@@ -13,7 +13,7 @@ export function LeaseCard({ lease, onOpenDetail }: any) {
     )}>
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <div className="h-11 w-11 rounded-full bg-blue-500/25 flex items-center justify-center font-bold text-sm text-blue-300 flex-shrink-0">
+          <div className="h-11 w-11 rounded-full bg-blue-500/25 flex items-center justify-center font-medium text-sm text-blue-300 flex-shrink-0">
             {lease.room.number}
           </div>
           <div>

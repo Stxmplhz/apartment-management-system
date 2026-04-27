@@ -49,7 +49,7 @@ export function PaymentSlipUpload({ invoice, open, onOpenChange, onSuccess }: {
       <DialogContent className="max-w-sm rounded-xl border-border p-0 overflow-hidden gap-0">
         <div className="h-1 bg-blue-500" />
         <div className="px-5 py-4 border-b border-border">
-          <DialogTitle className="text-sm font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Upload Payment Slip</DialogTitle>
+          <DialogTitle className="text-sm font-medium" style={{ fontFamily: 'Lexend, sans-serif' }}>Upload Payment Slip</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             Invoice {invoice.invoiceNumber}
           </DialogDescription>
@@ -99,7 +99,7 @@ export function PaymentSlipUpload({ invoice, open, onOpenChange, onSuccess }: {
             {/* Invoice summary */}
             <div className="flex items-center justify-between p-3 bg-secondary border border-border rounded-lg">
               <span className="text-xs text-muted-foreground">Amount Due</span>
-              <span className="text-sm font-bold text-blue-600" style={{ fontFamily: 'Syne, sans-serif' }}>{formatCurrency(invoice.totalAmount)}</span>
+              <span className="text-sm font-medium text-blue-600" style={{ fontFamily: 'Lexend, sans-serif' }}>{formatCurrency(invoice.totalAmount)}</span>
             </div>
           </div>
 

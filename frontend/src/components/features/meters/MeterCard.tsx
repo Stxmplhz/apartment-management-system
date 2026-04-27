@@ -24,7 +24,7 @@ export function MeterCard({ room, data, rates, onUpdate, calculateUsage }: any) 
          hasError ? "bg-red-50" : isSaved ? "bg-emerald-500/10" : "bg-slate-50/50"
       )}>
         <div className="flex items-center gap-3">
-          <h3 className="font-bold text-lg text-slate-800">Room {room.number}</h3>
+          <h3 className="font-medium text-lg text-slate-800">Room {room.number}</h3>
           {hasError ? (
             <div className="flex items-center gap-1.5 bg-red-600 text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase">
               <AlertCircle className="h-3 w-3" /> Error Value
@@ -53,9 +53,9 @@ export function MeterCard({ room, data, rates, onUpdate, calculateUsage }: any) 
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-amber-600"><Zap className="h-4 w-4 fill-amber-500" /><span className="font-black text-[10px] uppercase tracking-tighter">Electricity (kWh)</span></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-[9px] font-bold text-slate-400 uppercase">Prev</Label><div className="h-10 px-3 bg-slate-100 rounded-xl flex items-center text-sm font-bold text-slate-600 border border-slate-200">{data.electricity.previous}</div></div>
+            <div><Label className="text-[9px] font-medium text-slate-400 uppercase">Prev</Label><div className="h-10 px-3 bg-slate-100 rounded-xl flex items-center text-sm font-medium text-slate-600 border border-slate-200">{data.electricity.previous}</div></div>
             <div>
-              <Label className="text-[9px] font-bold text-slate-400 uppercase">Current</Label>
+              <Label className="text-[9px] font-medium text-slate-400 uppercase">Current</Label>
               <Input 
                 type="number" 
                 value={data.electricity.current} 
@@ -71,9 +71,9 @@ export function MeterCard({ room, data, rates, onUpdate, calculateUsage }: any) 
         <div className="space-y-4 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-8">
           <div className="flex items-center gap-2 text-blue-600"><Droplets className="h-4 w-4 fill-blue-500" /><span className="font-black text-[10px] uppercase tracking-tighter">Water (Units)</span></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-[9px] font-bold text-slate-400 uppercase">Prev</Label><div className="h-10 px-3 bg-slate-100 rounded-xl flex items-center text-sm font-bold text-slate-600 border border-slate-200">{data.water.previous}</div></div>
+            <div><Label className="text-[9px] font-medium text-slate-400 uppercase">Prev</Label><div className="h-10 px-3 bg-slate-100 rounded-xl flex items-center text-sm font-medium text-slate-600 border border-slate-200">{data.water.previous}</div></div>
             <div>
-              <Label className="text-[9px] font-bold text-slate-400 uppercase">Current</Label>
+              <Label className="text-[9px] font-medium text-slate-400 uppercase">Current</Label>
               <Input 
                 type="number" 
                 value={data.water.current} 

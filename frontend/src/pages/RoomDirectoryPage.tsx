@@ -39,7 +39,7 @@ export default function RoomDirectoryPage() {
       {filteredRooms.length === 0 && (
         <div className="text-center py-20 bg-secondary/50 border-2 border-dashed border-border rounded-2xl">
           <Building2 className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-          <h3 className="font-semibold text-foreground text-sm" style={{ fontFamily: 'Syne, sans-serif' }}>No matching rooms</h3>
+          <h3 className="font-semibold text-foreground text-sm" style={{ fontFamily: 'Lexend, sans-serif' }}>No matching rooms</h3>
           <p className="text-xs text-muted-foreground mt-1">Try adjusting your filters.</p>
         </div>
       )}

@@ -20,14 +20,14 @@ export default function LoginPage() {
           <div className="h-12 w-12 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Building2 className="h-6 w-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>NestAdmin</h1>
+          <h1 className="text-2xl font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>NestAdmin</h1>
           <p className="text-xs text-muted-foreground uppercase tracking-widest">Apartment Management System</p>
         </div>
 
         {/* Login box */}
         <div className="bg-card border border-border rounded-2xl p-8 shadow-xl shadow-black/5">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Welcome back</h2>
+            <h2 className="text-xl font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Welcome back</h2>
             <p className="text-sm text-muted-foreground mt-1">Sign in to your account</p>
           </div>
 

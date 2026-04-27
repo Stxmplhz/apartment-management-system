@@ -22,12 +22,12 @@ export function MoveInSuccess({ generatedPass, onReset }: { generatedPass: strin
             <CheckCircle className="h-6 w-6 text-emerald-500" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Registration Complete!</h2>
+            <h2 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Registration Complete!</h2>
             <p className="text-xs text-muted-foreground mt-1">Tenant account and lease created successfully.</p>
           </div>
           <div className="relative">
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide mb-2">Temporary Password</p>
-            <div className="p-4 bg-secondary border border-border rounded-xl font-mono text-2xl tracking-widest font-bold text-foreground select-all">
+            <div className="p-4 bg-secondary border border-border rounded-xl font-mono text-2xl tracking-widest font-medium text-foreground select-all">
               {generatedPass}
             </div>
             <button onClick={handleCopy}

@@ -69,11 +69,11 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
           {/* Header */}
           <div className="px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full flex items-center justify-center font-bold text-sm text-white flex-shrink-0" style={{ background: '#3b82f6' }}>
+              <div className="h-9 w-9 rounded-full flex items-center justify-center font-medium text-sm text-white flex-shrink-0" style={{ background: '#3b82f6' }}>
                 {lease.room.number}
               </div>
               <div>
-                <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Contract Details</h2>
+                <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Contract Details</h2>
                 <p className="text-[11px] text-muted-foreground">ID: {lease.id.slice(-8)}</p>
               </div>
             </div>
@@ -179,7 +179,7 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 pb-4 animate-in fade-in duration-200">
           <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Terminate Contract?</h2>
+              <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Terminate Contract?</h2>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setIsConfirmOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>

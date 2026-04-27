@@ -28,7 +28,7 @@ export default function UserManagementPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>User Administration</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>User Administration</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Manage roles and system access</p>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
@@ -54,7 +54,7 @@ export default function UserManagementPage() {
               <Icon className={`h-4 w-4 ${color}`} />
             </div>
             <div>
-              <p className="text-xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{value}</p>
+              <p className="text-xl font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>{value}</p>
               <p className="text-[11px] text-muted-foreground">{label}</p>
             </div>
           </div>

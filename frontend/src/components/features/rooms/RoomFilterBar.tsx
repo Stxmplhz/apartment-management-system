@@ -8,7 +8,7 @@ export function RoomFilterBar({ filters, stats, onAddClick }: any) {
     <div className="space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Room Directory</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Room Directory</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Filter by status, number, or price range</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

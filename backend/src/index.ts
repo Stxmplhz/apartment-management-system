@@ -8,6 +8,7 @@ import { paymentRoutes } from './routes/payments'
 import { authRoutes } from './routes/auth'
 import { maintenanceRoutes } from './routes/maintenance'
 import { userRoutes } from './routes/users'
+import { statsRoutes } from './routes/stats'
 import { leaseRoutes } from './routes/lease'
 
 const port = process.env.PORT || 3001
@@ -39,6 +40,7 @@ const app = new Elysia()
   .use(invoiceRoutes)
   .use(paymentRoutes)
   .use(maintenanceRoutes)
+  .use(statsRoutes)
   .use(leaseRoutes)
   .listen(port)
 

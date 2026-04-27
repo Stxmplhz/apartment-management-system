@@ -26,7 +26,7 @@ export default function LeaseManagementPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Lease Management</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Lease Management</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             {processedLeases.filter(l => l.status === 'ACTIVE').length} active ·{' '}
             {processedLeases.length} total contracts
@@ -77,7 +77,7 @@ export default function LeaseManagementPage() {
                   >
                     {/* Room */}
                     <td className="px-5 py-4">
-                      <div className="h-8 w-8 rounded-lg bg-blue-500 text-white flex items-center justify-center text-xs font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>
+                      <div className="h-8 w-8 rounded-lg bg-blue-500 text-white flex items-center justify-center text-xs font-medium" style={{ fontFamily: 'Lexend, sans-serif' }}>
                         {lease.room.number}
                       </div>
                     </td>

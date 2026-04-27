@@ -28,7 +28,7 @@ export function RoomDetailDrawer({ room, onClose, onUpdatePrice, onDelete }: any
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
           <div>
-            <h2 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Room {room.number}</h2>
+            <h2 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Room {room.number}</h2>
             <p className="text-xs text-muted-foreground">Floor {room.floor}</p>
           </div>
           <div className="flex items-center gap-2">

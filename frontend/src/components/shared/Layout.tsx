@@ -26,7 +26,7 @@ export default function Layout() {
         {/* Topbar */}
         <header className="sticky top-0 z-30 h-16 bg-card border-b border-border flex items-center px-6 gap-4 shadow-sm">
           <div className="flex-1">
-            <h1 className="text-base font-bold text-foreground leading-tight" style={{ fontFamily: 'Syne, sans-serif' }}>{title}</h1>
+            <h1 className="text-base font-medium text-foreground leading-tight" style={{ fontFamily: 'Lexend, sans-serif' }}>{title}</h1>
             {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
           </div>
           <div className="flex items-center gap-2 bg-secondary border border-border rounded-lg px-3 py-2 w-52 focus-within:border-blue-400 transition-colors">

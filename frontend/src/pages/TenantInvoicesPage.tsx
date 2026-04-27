@@ -60,7 +60,7 @@ export default function TenantInvoicesPage() {
     <div className="space-y-5 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>My Invoices</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>My Invoices</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Your billing history and payment status</p>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">

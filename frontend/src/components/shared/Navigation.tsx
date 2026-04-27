@@ -15,7 +15,8 @@ export function Navigation() {
     if (!user) return []
     if (user.role === 'ADMIN') {
       return [
-        { href: "/", label: "Rooms", icon: Building2, section: "Main" },
+        { href: "/", label: "Dashboard", icon: LayoutDashboard, section: "Main" },
+        { href: "/rooms", label: "Rooms", icon: Building2, section: "Main" },
         { href: "/move-in", label: "Move-in", icon: UserPlus, section: "Main" },
         { href: "/leases", label: "Leases", icon: FileText, section: "Main" },
         { href: "/meter", label: "Billing & Utilities", icon: Gauge, section: "Finance" },
@@ -74,7 +75,7 @@ export function Navigation() {
           <Building2 className="h-4 w-4 text-white" />
         </div>
         <div>
-          <div className="font-bold text-sm text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>NestAdmin</div>
+          <div className="font-medium text-sm text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>NestAdmin</div>
           <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Management System</div>
         </div>
       </div>
@@ -134,7 +135,7 @@ export function Navigation() {
           <div className="h-7 w-7 rounded-lg bg-blue-500 flex items-center justify-center">
             <Building2 className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold text-sm" style={{ fontFamily: 'Syne, sans-serif' }}>NestAdmin</span>
+          <span className="font-medium text-sm" style={{ fontFamily: 'Lexend, sans-serif' }}>NestAdmin</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}

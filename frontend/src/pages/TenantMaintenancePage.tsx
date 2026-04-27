@@ -72,7 +72,7 @@ export default function TenantMaintenancePage() {
     <div className="space-y-5 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>My Maintenance Requests</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>My Maintenance Requests</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Track your repair requests</p>
         </div>
         <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function TenantMaintenancePage() {
 
       {showForm && (
         <div className="bg-card border border-border rounded-xl p-5 shadow-sm animate-in slide-in-from-top-2">
-          <h2 className="text-sm font-bold text-foreground mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>What needs fixing?</h2>
+          <h2 className="text-sm font-medium text-foreground mb-4" style={{ fontFamily: 'Lexend, sans-serif' }}>What needs fixing?</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <Textarea placeholder="Explain the problem (e.g. Toilet leak, AC not cold...)" value={description} onChange={(e) => setDescription(e.target.value)} className="min-h-28 rounded-lg border-border bg-secondary text-sm resize-none" />
             <div className="flex flex-wrap gap-3 items-center">

@@ -9,7 +9,7 @@ export function PaymentFilterBar({ stats, filters, uniqueFloors }: any) {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Payment Verification</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Payment Verification</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Awaiting verification: <span className="text-amber-500 font-semibold">{stats.pending} slips</span>
           </p>

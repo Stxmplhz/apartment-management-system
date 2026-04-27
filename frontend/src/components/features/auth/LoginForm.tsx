@@ -42,7 +42,7 @@ export function LoginForm({ form }: any) {
         />
       </div>
 
-      <Button type="submit" disabled={isLoading} className="w-full h-10 mt-6 font-bold shadow-sm">
+      <Button type="submit" disabled={isLoading} className="w-full h-10 mt-6 font-medium shadow-sm">
         {isLoading ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />

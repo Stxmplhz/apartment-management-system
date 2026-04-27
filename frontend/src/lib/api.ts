@@ -66,6 +66,11 @@ export const api = {
       fetchApi<ApiSuccess>(`/api/users/${id}`, { method: 'DELETE' }),
   },
 
+  // Stats
+  stats: {
+    dashboard: () => fetchApi<any>('/api/stats/dashboard'),
+  },
+
   // Rooms
   rooms: {
     list: (params?: { status?: string; floor?: string }) => {

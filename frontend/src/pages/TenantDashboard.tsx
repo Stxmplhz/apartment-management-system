@@ -67,7 +67,7 @@ export default function TenantDashboard() {
     <div className="space-y-5 pb-10">
       {/* Header */}
       <div className="bg-card p-5 rounded-xl border border-border shadow-sm">
-        <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Welcome Back</h1>
+        <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Welcome Back</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Manage your apartment, payments, and maintenance requests</p>
       </div>
 
@@ -85,7 +85,7 @@ export default function TenantDashboard() {
                 <Icon className={cn('h-4 w-4', iconColor)} />
               </div>
               <div>
-                <p className="text-xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{value}</p>
+                <p className="text-xl font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>{value}</p>
                 <p className="text-[11px] text-muted-foreground">{label}</p>
               </div>
             </div>
@@ -98,7 +98,7 @@ export default function TenantDashboard() {
         <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="px-5 py-3.5 border-b border-border flex items-center gap-2">
             <Home className="h-4 w-4 text-blue-500" />
-            <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>My Room</h2>
+            <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>My Room</h2>
             <span className="ml-auto text-[10px] font-medium px-2 py-0.5 rounded-full border bg-emerald-500/15 text-emerald-500 border-emerald-500/20">ACTIVE</span>
           </div>
           <div className="grid grid-cols-3 divide-x divide-border">
@@ -119,7 +119,7 @@ export default function TenantDashboard() {
       {/* Invoices */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Recent Invoices</h2>
+          <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Recent Invoices</h2>
           <button onClick={() => navigate('/my-invoices')} className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1 font-medium">
             View All <ArrowRight className="h-3 w-3" />
           </button>
@@ -155,7 +155,7 @@ export default function TenantDashboard() {
       {/* Maintenance */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Maintenance Requests</h2>
+          <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Maintenance Requests</h2>
           <button onClick={() => navigate('/my-maintenance')} className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1 font-medium">
             View All <ArrowRight className="h-3 w-3" />
           </button>

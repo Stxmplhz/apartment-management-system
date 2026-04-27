@@ -15,6 +15,7 @@ import UserManagementPage from './pages/UserManagementPage'
 import LeaseManagementPage from './pages/LeaseManagementPage'
 import TenantInvoicesPage from './pages/TenantInvoicesPage'
 import TenantMaintenancePage from './pages/TenantMaintenancePage'
+import DashboardPage from './pages/DashboardPage'
 
 function App() {
   return (
@@ -34,7 +35,8 @@ function App() {
         >
           {/* Admin Only */}
           <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-            <Route index element={<RoomDirectoryPage />} />
+            <Route index element={<DashboardPage />} />
+            <Route path="rooms" element={<RoomDirectoryPage />} />
             <Route path="move-in" element={<MoveInPage />} />
             <Route path="meter" element={<MeterReadingPage />} />
             <Route path="payments" element={<PaymentsPage />} />

@@ -76,7 +76,7 @@ export function UserProfileDrawer({ user, onClose, actions }: {
       <div className="fixed inset-0 left-auto w-full max-w-sm bg-card border-l border-border shadow-2xl z-[201] flex flex-col animate-in slide-in-from-right duration-200">
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
-          <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Profile Administration</h2>
+          <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Profile Administration</h2>
           <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
@@ -85,7 +85,7 @@ export function UserProfileDrawer({ user, onClose, actions }: {
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {/* Avatar + name */}
           <div className="flex flex-col items-center text-center p-6 bg-secondary rounded-xl border border-border">
-            <div className={cn("h-14 w-14 rounded-full flex items-center justify-center text-xl font-bold mb-3 text-white",
+            <div className={cn("h-14 w-14 rounded-full flex items-center justify-center text-xl font-medium mb-3 text-white",
               user.role === 'ADMIN' ? "bg-gradient-to-br from-purple-500 to-pink-400" :
               user.role === 'TECHNICIAN' ? "bg-gradient-to-br from-amber-500 to-orange-400" :
               "bg-gradient-to-br from-blue-500 to-cyan-400"
@@ -101,7 +101,7 @@ export function UserProfileDrawer({ user, onClose, actions }: {
                   disabled={updatingRole !== null}
                   onClick={() => handleChangeRole(r)}
                   className={cn(
-                    "text-[10px] font-bold px-2.5 py-1 rounded-md border transition-all flex items-center gap-1",
+                    "text-[10px] font-medium px-2.5 py-1 rounded-md border transition-all flex items-center gap-1",
                     user.role === r 
                       ? roleStyle[r] 
                       : "bg-transparent border-border text-muted-foreground hover:border-blue-500/30 hover:text-foreground"

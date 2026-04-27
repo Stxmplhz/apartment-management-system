@@ -43,7 +43,7 @@ export function AddTechnicianModal({ onClose, onSuccess }: { onClose: () => void
           <form onSubmit={handleSubmit}>
             {/* Header */}
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-              <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Register Technician</h2>
+              <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Register Technician</h2>
               <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={onClose}>
                 <X className="h-4 w-4" />
               </Button>
@@ -98,11 +98,11 @@ export function AddTechnicianModal({ onClose, onSuccess }: { onClose: () => void
               <Key className="h-5 w-5 text-emerald-600" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Technician Registered</h3>
+              <h3 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Technician Registered</h3>
               <p className="text-xs text-muted-foreground mt-1">Share this temporary password with the staff</p>
             </div>
             <div className="relative">
-              <div className="p-4 bg-secondary border border-border rounded-xl font-mono text-2xl tracking-widest font-bold text-foreground select-all">
+              <div className="p-4 bg-secondary border border-border rounded-xl font-mono text-2xl tracking-widest font-medium text-foreground select-all">
                 {tempPass}
               </div>
               <button onClick={handleCopy}

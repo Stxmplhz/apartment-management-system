@@ -9,7 +9,7 @@ export function TenantProfileCard({ formData, files, availableRooms, actions }: 
     <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-border flex items-center gap-2">
         <UserPlus className="h-4 w-4 text-blue-500" />
-        <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Tenant Details</h2>
+        <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Tenant Details</h2>
       </div>
       <div className="p-5 space-y-4">
         {/* Room select */}

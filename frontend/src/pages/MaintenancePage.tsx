@@ -67,7 +67,7 @@ export default function MaintenancePage() {
       {/* Tenant Request Form */}
       {roles.userIsTenant && showForm && (
         <div className="bg-card border border-blue-200 rounded-xl p-6 shadow-sm animate-in slide-in-from-top-2">
-          <h2 className="text-sm font-bold text-foreground mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>What needs fixing?</h2>
+          <h2 className="text-sm font-medium text-foreground mb-4" style={{ fontFamily: 'Lexend, sans-serif' }}>What needs fixing?</h2>
           <form onSubmit={handleSubmitRequest} className="space-y-4">
             <Textarea
               placeholder="Explain the problem (e.g. Toilet leak, AC not cold...)"
@@ -114,7 +114,7 @@ export default function MaintenancePage() {
           <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-2xl animate-in zoom-in-95">
             <div className="p-5 border-b border-border flex justify-between items-center">
               <div>
-                <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Assign Technician</h2>
+                <h2 className="text-sm font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Assign Technician</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Select a service provider</p>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setIsAssignModalOpen(false)}><X className="h-4 w-4" /></Button>

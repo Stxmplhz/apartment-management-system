@@ -26,7 +26,7 @@ export default function InvoicesPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Billing & Invoices</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Billing & Invoices</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Unpaid: <span className="text-red-500 font-semibold">{stats.pending} rooms</span>
             {' · '}Total Due: <span className="text-foreground font-semibold">{formatCurrency(stats.totalAmount)}</span>
