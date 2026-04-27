@@ -63,9 +63,29 @@ export function useInvoices(selectedMonth: string) {
     uniqueFloors: [...new Set(invoices.map(i => i.lease?.room?.floor))].filter(Boolean).sort()
   }), [invoices]);
 
+  const handleGenerateAll = async () => {
+    try {
+      setLoading(true);
+      const res = await api.invoices.generateAll({ 
+        month: selectedMonth,
+        monthDisplay: new Date(selectedMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+      });
+      
+      if (res.success) {
+        toast.success(`Success! Created: ${res.summary.created}, Skipped: ${res.summary.skipped}`);
+        if (res.summary.errors > 0) toast.error(`${res.summary.errors} errors occurred`);
+        await loadInvoices();
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to generate invoices');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     processedInvoices, loading, stats, processingId,
     filters: { searchQuery, setSearchQuery, statusFilter, setStatusFilter, floorFilter, setFloorFilter, sortBy, setSortBy },
-    actions: { handleMarkPaid, refresh: loadInvoices }
+    actions: { handleMarkPaid, handleGenerateAll, refresh: loadInvoices }
   };
 }

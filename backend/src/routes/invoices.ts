@@ -240,6 +240,98 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
     }),
   })
   
+  // Bulk generate invoices for all active leases (UC-08 Extension)
+  .post('/generate-all', async ({ body }) => {
+    const { month, monthDisplay, dueDate } = body
+    
+    // 1. Get all active leases
+    const activeLeases = await prisma.lease.findMany({
+      where: { status: 'ACTIVE' },
+      include: { room: true, tenant: true }
+    })
+    
+    let createdCount = 0
+    let skippedCount = 0
+    let errors: string[] = []
+    
+    const results = await Promise.all(activeLeases.map(async (lease) => {
+      try {
+        // Check if invoice already exists
+        const existing = await prisma.invoice.findFirst({
+          where: { leaseId: lease.id, month: monthDisplay || month }
+        })
+        
+        if (existing) {
+          skippedCount++
+          return { roomId: lease.room.number, status: 'SKIPPED', reason: 'Already exists' }
+        }
+        
+        // Get meter readings
+        const meterReadings = await prisma.meterReading.findMany({
+          where: { roomId: lease.roomId, month }
+        })
+        
+        const elecReading = meterReadings.find(r => r.utilityType === 'ELECTRICITY')
+        const waterReading = meterReadings.find(r => r.utilityType === 'WATER')
+        
+        if (!elecReading || !waterReading) {
+          skippedCount++
+          return { roomId: lease.room.number, status: 'SKIPPED', reason: 'Missing readings' }
+        }
+        
+        // Calculate costs
+        const electricityCost = elecReading.usage * elecReading.rateAtTime
+        const waterCost = waterReading.usage * waterReading.rateAtTime
+        const baseRent = lease.agreedBaseRent
+        const totalAmount = baseRent + electricityCost + waterCost
+        
+        // Generate number
+        const year = new Date().getFullYear()
+        const count = await prisma.invoice.count({
+          where: { invoiceNumber: { startsWith: `INV-${year}` } }
+        })
+        const invoiceNumber = `INV-${year}-${String(count + createdCount + 1).padStart(4, '0')}`
+        
+        await prisma.invoice.create({
+          data: {
+            invoiceNumber,
+            leaseId: lease.id,
+            month: monthDisplay || month,
+            baseRent,
+            electricityCost,
+            waterCost,
+            totalAmount,
+            status: 'UNPAID',
+            dueDate: dueDate ? new Date(dueDate) : null,
+          }
+        })
+        
+        createdCount++
+        return { roomId: lease.room.number, status: 'CREATED' }
+      } catch (err: any) {
+        errors.push(`Room ${lease.room.number}: ${err.message}`)
+        return { roomId: lease.room.number, status: 'ERROR', message: err.message }
+      }
+    }))
+    
+    return {
+      success: true,
+      summary: {
+        totalProcessed: activeLeases.length,
+        created: createdCount,
+        skipped: skippedCount,
+        errors: errors.length
+      },
+      details: results
+    }
+  }, {
+    body: t.Object({
+      month: t.String(),
+      monthDisplay: t.Optional(t.String()),
+      dueDate: t.Optional(t.String()),
+    })
+  })
+  
   // Delete invoice
   .delete('/:id', async ({ params }) => {
     // Check if invoice has payments

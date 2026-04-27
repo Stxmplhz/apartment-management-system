@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   X, ImageIcon, Calendar, User, CreditCard, Phone, 
-  Fingerprint, Hourglass, ExternalLink, 
+  Fingerprint, Hourglass, ExternalLink, Download,
   FileText, ShieldAlert, Trash2, Loader2 
 } from "lucide-react";
 import { formatCurrency, formatDateEng, getImageUrl } from "@/lib/utils";
@@ -26,6 +26,29 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
       toast.error("Error in termination process");
     } finally {
       setTerminating(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    const url = getImageUrl(lease.contractUrl);
+    if (!url) return;
+
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      // Set filename based on room number and lease ID
+      const fileName = `Contract_Room_${lease.room.number}_${lease.id.slice(-6)}.pdf`;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      // Fallback: if fetch fails, open in new tab
+      window.open(url, '_blank');
     }
   };
 
@@ -95,9 +118,21 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
 
               {/* Right: Document */}
               <div className="space-y-3">
-                <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
-                  <ImageIcon className="h-3 w-3" /> Contract Document
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 uppercase tracking-wide">
+                    <ImageIcon className="h-3 w-3" /> Contract Document
+                  </p>
+                  {lease.contractUrl && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 px-2 text-[10px] text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                      onClick={handleDownload}
+                    >
+                      <Download className="h-3 w-3 mr-1" /> Download PDF
+                    </Button>
+                  )}
+                </div>
 
                 {lease.contractUrl ? (
                   <div

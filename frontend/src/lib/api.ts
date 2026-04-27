@@ -58,6 +58,10 @@ export const api = {
     list: () => fetchApi<User[]>('/api/users'),
     toggleStatus: (id: string, isActive: boolean) =>
       fetchApi<User>(`/api/users/${id}/status`, { method: 'PUT', body: { isActive } }),
+    changeRole: (id: string, role: string) =>
+      fetchApi<User>(`/api/users/${id}/role`, { method: 'PUT', body: { role } }),
+    resetPassword: (id: string, password: string) =>
+      fetchApi<ApiSuccess>(`/api/users/${id}/reset-password`, { method: 'POST', body: { password } }),
     delete: (id: string) =>
       fetchApi<ApiSuccess>(`/api/users/${id}`, { method: 'DELETE' }),
   },
@@ -130,6 +134,8 @@ export const api = {
     get: (id: string) => fetchApi<Invoice>(`/api/invoices/${id}`),
     generate: (data: { roomId: string; month: string; monthDisplay?: string; dueDate?: string }) => 
       fetchApi<Invoice>('/api/invoices/generate', { method: 'POST', body: data }),
+    generateAll: (data: { month: string; monthDisplay?: string; dueDate?: string }) => 
+      fetchApi<any>('/api/invoices/generate-all', { method: 'POST', body: data }),
     create: (data: Partial<Invoice>) => 
       fetchApi<Invoice>('/api/invoices', { method: 'POST', body: data }),
     update: (id: string, data: Partial<Invoice>) => 

@@ -9,7 +9,7 @@ import { Wrench, Loader2, Search, Users, ShieldCheck, UserCog } from "lucide-rea
 
 export default function UserManagementPage() {
   const { filteredUsers, loading, searchQuery, setSearchQuery, actions } = useUsers()
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [isAddingTech, setIsAddingTech] = useState(false)
 
   if (loading && filteredUsers.length === 0) {
@@ -20,6 +20,8 @@ export default function UserManagementPage() {
   const tenantCount = allUsers.filter(u => u.role === 'TENANT').length
   const techCount = allUsers.filter(u => u.role === 'TECHNICIAN').length
   const activeCount = allUsers.filter(u => u.isActive).length
+
+  const selectedUser = allUsers.find(u => u.id === selectedUserId)
 
   return (
     <div className="space-y-5 pb-20">
@@ -59,8 +61,12 @@ export default function UserManagementPage() {
         ))}
       </div>
 
-      <UserTable users={filteredUsers} onViewUser={setSelectedUser} />
-      <UserProfileDrawer user={selectedUser} onClose={() => setSelectedUser(null)} />
+      <UserTable users={filteredUsers} onViewUser={(u) => setSelectedUserId(u.id)} />
+      <UserProfileDrawer 
+        user={selectedUser} 
+        onClose={() => setSelectedUserId(null)} 
+        actions={actions}
+      />
       {isAddingTech && <AddTechnicianModal onClose={() => setIsAddingTech(false)} onSuccess={actions.refresh} />}
     </div>
   )

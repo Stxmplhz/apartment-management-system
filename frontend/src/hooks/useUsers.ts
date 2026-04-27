@@ -33,8 +33,37 @@ export function useUsers() {
         })
     }, [users, searchQuery])
 
+    const toggleStatus = async (id: string, current: boolean) => {
+        try {
+            await api.users.toggleStatus(id, !current)
+            toast.success("Status updated")
+            loadAllUsers()
+        } catch { toast.error("Update failed") }
+    }
+
+    const changeRole = async (id: string, role: string) => {
+        try {
+            await api.users.changeRole(id, role)
+            toast.success("Role updated")
+            loadAllUsers()
+        } catch { toast.error("Update failed") }
+    }
+
+    const resetPassword = async (id: string, pass: string) => {
+        try {
+            await api.users.resetPassword(id, pass)
+            toast.success("Password reset successfully")
+            loadAllUsers()
+        } catch { toast.error("Reset failed") }
+    }
+
     return {
         filteredUsers, loading, searchQuery, setSearchQuery,
-        actions: { refresh: loadAllUsers }
+        actions: { 
+            refresh: loadAllUsers,
+            toggleStatus,
+            changeRole,
+            resetPassword
+        }
     }
 }

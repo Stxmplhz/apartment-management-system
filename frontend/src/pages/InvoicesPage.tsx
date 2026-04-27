@@ -4,6 +4,7 @@ import { useInvoices } from "@/hooks/useInvoices"
 import { InvoiceCard } from "@/components/features/invoices/InvoiceCard"
 import { InvoiceFilterBar } from "@/components/features/invoices/InvoiceFilterBar"
 import { PaymentSlipUpload } from "@/components/features/invoices/PaymentSlipUpload"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Calendar, Loader2, Receipt } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
@@ -40,6 +41,16 @@ export default function InvoicesPage() {
             <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
             <input type="month" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)} className="bg-transparent text-sm outline-none text-foreground" />
           </div>
+          {user?.role === 'ADMIN' && (
+            <Button 
+              size="sm" 
+              onClick={actions.handleGenerateAll} 
+              disabled={loading}
+              className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg h-9 px-4"
+            >
+              <Receipt className="mr-1.5 h-3.5 w-3.5" /> Generate All
+            </Button>
+          )}
         </div>
       </div>
 
