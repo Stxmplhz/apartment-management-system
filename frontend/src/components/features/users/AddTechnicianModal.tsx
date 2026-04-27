@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Key, X, Loader2, Copy, Check } from "lucide-react"
 import { toast } from "sonner"
+import { Portal } from "@/components/ui/portal"
 
 export function AddTechnicianModal({ onClose, onSuccess }: { onClose: () => void, onSuccess: () => void }) {
   const [form, setForm] = useState({ email: '', firstName: '', lastName: '', phone: '', expertise: '' })
@@ -34,6 +35,7 @@ export function AddTechnicianModal({ onClose, onSuccess }: { onClose: () => void
   }
 
   return (
+    <Portal>
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
       <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
 
@@ -115,5 +117,6 @@ export function AddTechnicianModal({ onClose, onSuccess }: { onClose: () => void
         )}
       </div>
     </div>
+    </Portal>
   )
 }

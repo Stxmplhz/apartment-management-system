@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Home, User, Clock, Wrench, ExternalLink, X, ChevronRight } from "lucide-react"
 import { cn, formatDateEng, getImageUrl } from "@/lib/utils"
+import { Portal } from "@/components/ui/portal"
 
 const statusStyle: Record<string, string> = {
   OPEN:        "bg-amber-500/15  text-amber-500  border-amber-500/20",
@@ -56,9 +57,9 @@ function ActionButtons({ request, roles, onUpdateStatus, onAssign, onClose, size
 
 function DetailModal({ request, roles, onUpdateStatus, onAssign, onClose }: any) {
   return (
-    <>
+    <Portal>
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[200]" onClick={onClose} />
-      <div className="fixed inset-0 z-[201] flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[201] flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 py-4">
         <div className="bg-card w-full max-w-lg rounded-xl border border-border shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
           <div className="px-5 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -116,7 +117,7 @@ function DetailModal({ request, roles, onUpdateStatus, onAssign, onClose }: any)
           </div>
         </div>
       </div>
-    </>
+    </Portal>
   )
 }
 

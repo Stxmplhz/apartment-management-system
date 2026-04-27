@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   X, ImageIcon, Calendar, User, CreditCard, Phone, 
-  Fingerprint, Hourglass, ShieldCheck, ExternalLink, 
+  Fingerprint, Hourglass, ExternalLink, 
   FileText, ShieldAlert, Trash2, Loader2 
 } from "lucide-react";
 import { formatCurrency, formatDateEng, getImageUrl } from "@/lib/utils";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { Portal } from "@/components/ui/portal";
 
 export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -38,8 +39,8 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
   ];
 
   return (
-    <>
-      <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <Portal>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
         <div className="bg-card w-full max-w-4xl max-h-[90vh] rounded-xl border border-border shadow-2xl flex flex-col animate-in zoom-in-95 duration-200 overflow-hidden">
 
           {/* Header */}
@@ -140,7 +141,7 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
 
       {/* Confirm Terminate */}
       {isConfirmOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4 pb-4 animate-in fade-in duration-200">
           <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
             <div className="px-5 py-4 border-b border-border flex items-center justify-between">
               <h2 className="text-sm font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Terminate Contract?</h2>
@@ -169,6 +170,6 @@ export function LeaseDetailModal({ lease, onClose, onRefresh, getLeaseAge }: any
           </div>
         </div>
       )}
-    </>
+    </Portal>
   );
 }

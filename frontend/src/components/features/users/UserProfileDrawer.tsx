@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Users, Phone, Fingerprint, Image as ImageIcon, X, Wrench, ShieldCheck } from "lucide-react"
 import { cn, getImageUrl } from "@/lib/utils"
+import { Portal } from "@/components/ui/portal"
 
 const roleStyle: Record<string, string> = {
   ADMIN:      "bg-purple-500/15 text-purple-400 border-purple-500/20",
@@ -31,7 +32,7 @@ export function UserProfileDrawer({ user, onClose }: { user: any, onClose: () =>
   }
 
   return (
-    <>
+    <Portal>
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[200]" onClick={onClose} />
 
@@ -98,6 +99,6 @@ export function UserProfileDrawer({ user, onClose }: { user: any, onClose: () =>
           )}
         </div>
       </div>
-    </>
+    </Portal>
   )
 }

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { X, Trash2, DoorOpen, Phone, User } from "lucide-react"
 import { cn, formatCurrency } from "@/lib/utils"
+import { Portal } from "@/components/ui/portal"
 
 export function RoomDetailDrawer({ room, onClose, onUpdatePrice, onDelete }: any) {
   const [editPrice, setEditPrice] = useState(room.pricePerMonth)
@@ -20,9 +21,9 @@ export function RoomDetailDrawer({ room, onClose, onUpdatePrice, onDelete }: any
   }
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-card border-l border-border shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-200">
+    <Portal>
+      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60] md:hidden" onClick={onClose} />
+      <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-card border-l border-border shadow-2xl z-[61] flex flex-col animate-in slide-in-from-right duration-200">
 
         {/* Header */}
         <div className="px-5 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
@@ -92,6 +93,6 @@ export function RoomDetailDrawer({ room, onClose, onUpdatePrice, onDelete }: any
           </Button>
         </div>
       </div>
-    </>
+    </Portal>
   )
 }

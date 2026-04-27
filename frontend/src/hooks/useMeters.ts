@@ -96,7 +96,8 @@ export function useMeters() {
         const invalidRooms: string[] = []
         occupiedRooms.forEach(room => {
             const data = meterData[room.id]
-            if (data?.electricity.current !== "" || data?.water.current !== "") {
+            if (room.isSaved) return // skip already saved rooms
+            if (data?.electricity.current !== "" && data?.water.current !== "") {
                 const eCalc = calculateUsage(data.electricity.previous, data.electricity.current)
                 const wCalc = calculateUsage(data.water.previous, data.water.current)
                 if (!eCalc.valid || !wCalc.valid) invalidRooms.push(room.number)

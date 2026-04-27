@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from '@/components/ui/textarea'
 import { Wrench, Loader2, X, Search, ImageIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { Portal } from '@/components/ui/portal'
 
 export default function MaintenancePage() {
   const { user } = useAuth()
@@ -108,6 +109,7 @@ export default function MaintenancePage() {
 
       {/* Assign Modal */}
       {isAssignModalOpen && (
+        <Portal>
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
           <div className="bg-card w-full max-w-md rounded-xl border border-border shadow-2xl animate-in zoom-in-95">
             <div className="p-5 border-b border-border flex justify-between items-center">
@@ -135,6 +137,7 @@ export default function MaintenancePage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   )

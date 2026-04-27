@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { X, Loader2 } from "lucide-react"
 import { toast } from "sonner"
+import { Portal } from "@/components/ui/portal"
 
 export function AddRoomModal({ onClose, onSuccess, existingRooms }: { onClose: () => void, onSuccess: () => void, existingRooms: any[] }) {
   const [newRoom, setNewRoom] = useState({ number: '', floor: '', price: '' })
@@ -27,7 +28,8 @@ export function AddRoomModal({ onClose, onSuccess, existingRooms }: { onClose: (
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+    <Portal>
+      <div className="fixed inset-0 z-[201] flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 py-4">
       <div className="bg-card w-full max-w-sm rounded-xl border border-border shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
         <form onSubmit={handleSubmit}>
           {/* Header */}
@@ -71,5 +73,6 @@ export function AddRoomModal({ onClose, onSuccess, existingRooms }: { onClose: (
         </form>
       </div>
     </div>
+    </Portal>
   )
 }
