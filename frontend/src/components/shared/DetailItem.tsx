@@ -3,13 +3,13 @@ import { cn } from "@/lib/utils";
 
 export function DetailItem({ icon, label, value, highlight = false }: any) {
   return (
-    <div className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all hover:border-blue-200">
-      <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-        {React.cloneElement(icon, { className: "h-5 w-5" })}
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-0">
+      <div className="h-7 w-7 rounded-lg bg-secondary border border-border flex items-center justify-center flex-shrink-0">
+        {React.cloneElement(icon, { className: "h-3.5 w-3.5 text-muted-foreground" })}
       </div>
-      <div className="overflow-hidden">
-        <p className="text-[9px] uppercase font-black text-slate-400 tracking-tighter leading-none mb-1">{label}</p>
-        <p className={cn("text-sm font-bold truncate", highlight ? "text-blue-600" : "text-slate-700")}>
+      <div className="flex-1 min-w-0">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+        <p className={cn("text-sm font-medium truncate", highlight ? "text-blue-400" : "text-foreground")}>
           {value || "Not Set"}
         </p>
       </div>
