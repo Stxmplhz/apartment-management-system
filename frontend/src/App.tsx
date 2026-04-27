@@ -54,6 +54,11 @@ function App() {
             <Route path="invoices" element={<InvoicesPage />} />
           </Route>
 
+          {/* Technician Only */}
+          <Route element={<ProtectedRoute allowedRoles={['TECHNICIAN']} />}>
+            <Route index element={<MaintenancePage />} />
+          </Route>
+
           {/* Shared: Admin + Technician */}
           <Route path="maintenance" element={<MaintenancePage />} />
         </Route>

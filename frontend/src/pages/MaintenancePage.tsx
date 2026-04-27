@@ -47,11 +47,7 @@ export default function MaintenancePage() {
   return (
     <div className="space-y-5 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
-        <div>
-          <h1 className="text-base font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>Maintenance Tickets</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Track and manage repair requests</p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
