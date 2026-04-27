@@ -1,95 +1,87 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Download, Zap, Droplets, CheckCircle2, Upload, Loader2 } from "lucide-react";
-import { cn, formatCurrency, formatMonthName } from "@/lib/utils";
-import { generateInvoicePDF } from "@/lib/pdf-service";
-import { WATER_RATE, ELECTRICITY_RATE } from "@/lib/constants";
+import { Button } from "@/components/ui/button"
+import { Download, Zap, Droplets, CheckCircle2, Upload, Loader2 } from "lucide-react"
+import { cn, formatCurrency, formatMonthName } from "@/lib/utils"
+import { generateInvoicePDF } from "@/lib/pdf-service"
+import { WATER_RATE, ELECTRICITY_RATE } from "@/lib/constants"
+
+const statusStyle: Record<string, string> = {
+  UNPAID:         "bg-red-50    text-red-600    border-red-100",
+  OVERDUE:        "bg-red-100   text-red-700    border-red-200",
+  PENDING_VERIFY: "bg-amber-50  text-amber-600  border-amber-100",
+  PAID:           "bg-emerald-50 text-emerald-600 border-emerald-100",
+}
+const statusLabel: Record<string, string> = {
+  UNPAID: "Unpaid", OVERDUE: "Overdue", PENDING_VERIFY: "Pending", PAID: "Paid"
+}
+const topBar: Record<string, string> = {
+  UNPAID: "bg-red-400", OVERDUE: "bg-red-600", PENDING_VERIFY: "bg-amber-400", PAID: "bg-emerald-500"
+}
 
 export function InvoiceCard({ invoice, userRole, onMarkPaid, onOpenPay, isProcessing }: any) {
-  const elecUsage = invoice.electricityUsage || (invoice.electricityCost / ELECTRICITY_RATE);
-  const waterUsage = invoice.waterUsage || (invoice.waterCost / WATER_RATE);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'UNPAID': return 'bg-red-100 text-red-700 border-red-200';
-      case 'OVERDUE': return 'bg-red-500 text-white border-red-600 shadow-md';
-      case 'PENDING_VERIFY': return 'bg-amber-100 text-amber-700 border-amber-200';
-      case 'PAID': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-      default: return 'bg-slate-100 text-slate-600';
-    }
-  };
+  const elecUsage = invoice.electricityUsage || (invoice.electricityCost / ELECTRICITY_RATE)
+  const waterUsage = invoice.waterUsage || (invoice.waterCost / WATER_RATE)
 
   return (
-    <Card className="rounded-[2rem] border-none shadow-md bg-white overflow-hidden hover:shadow-xl transition-all group flex flex-col">
-      <div className="px-6 py-5 border-b bg-slate-50/50 flex justify-between items-start">
-        <div className="flex gap-4 items-center">
-          <div className="h-12 w-12 rounded-2xl bg-blue-100 text-blue-600 flex flex-col items-center justify-center font-black">
-            <span className="text-[8px] opacity-60 uppercase">Room</span>
-            <span className="text-lg leading-tight">{invoice.lease?.room?.number}</span>
+    <div className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col">
+      {/* Top color bar */}
+      <div className={cn("h-1", topBar[invoice.status] ?? "bg-border")} />
+
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-blue-500 text-white flex flex-col items-center justify-center flex-shrink-0" style={{ fontFamily: 'Syne, sans-serif' }}>
+            <span className="text-[8px] opacity-70 leading-none">Rm</span>
+            <span className="text-sm font-bold leading-tight">{invoice.lease?.room?.number}</span>
           </div>
           <div>
-            <h3 className="font-bold text-slate-900">{invoice.lease?.tenant?.firstName} {invoice.lease?.tenant?.lastName}</h3>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{formatMonthName(invoice.month)}</p>
+            <p className="text-sm font-semibold text-foreground">{invoice.lease?.tenant?.firstName} {invoice.lease?.tenant?.lastName}</p>
+            <p className="text-[11px] text-muted-foreground">{formatMonthName(invoice.month)}</p>
           </div>
         </div>
-        <span className={cn("text-[9px] font-black px-3 py-1 rounded-full uppercase border", getStatusColor(invoice.status))}>
-          {invoice.status === 'PENDING_VERIFY' ? 'Checking' : invoice.status}
+        <span className={cn("text-[11px] font-medium px-2 py-0.5 rounded-full border", statusStyle[invoice.status] ?? statusStyle.UNPAID)}>
+          {statusLabel[invoice.status] ?? invoice.status}
         </span>
       </div>
 
-      <div className="p-6 space-y-3 text-sm flex-1">
-        <DetailRow label="Base Rent" value={formatCurrency(invoice.baseRent)} />
-        <DetailRow 
-          label={`Elec (${elecUsage.toFixed(0)} u)`} 
-          value={formatCurrency(invoice.electricityCost)} 
-          icon={<Zap className="h-3 w-3"/>}
-          variant="amber"
-        />
-        <DetailRow 
-          label={`Water (${waterUsage.toFixed(0)} u)`} 
-          value={formatCurrency(invoice.waterCost)} 
-          icon={<Droplets className="h-3 w-3"/>}
-          variant="blue"
-        />
-        <div className="flex justify-between items-end pt-4">
-          <span className="text-[10px] font-black uppercase text-slate-400">Total Due</span>
-          <span className="text-2xl font-black text-blue-600">{formatCurrency(invoice.totalAmount)}</span>
+      {/* Breakdown */}
+      <div className="px-5 py-4 space-y-2.5 flex-1">
+        <Row label="Base Rent" value={formatCurrency(invoice.baseRent)} />
+        <Row label={`Electricity (${elecUsage.toFixed(0)} kWh)`} value={formatCurrency(invoice.electricityCost)} icon={<Zap className="h-3 w-3 text-amber-500" />} />
+        <Row label={`Water (${waterUsage.toFixed(0)} m³)`} value={formatCurrency(invoice.waterCost)} icon={<Droplets className="h-3 w-3 text-blue-500" />} />
+        <div className="pt-2 border-t border-border flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">Total Due</span>
+          <span className="text-lg font-bold text-blue-600" style={{ fontFamily: 'Syne, sans-serif' }}>{formatCurrency(invoice.totalAmount)}</span>
         </div>
       </div>
 
-      <div className="p-4 bg-slate-50 flex gap-2">
-        <Button variant="outline" className="rounded-xl flex-1 bg-white" onClick={() => generateInvoicePDF(invoice)}>
-          <Download className="h-4 w-4 mr-2"/> PDF
+      {/* Actions */}
+      <div className="px-5 py-4 border-t border-border flex gap-2">
+        <Button variant="outline" size="sm" className="rounded-lg h-9 flex-1 text-xs" onClick={() => generateInvoicePDF(invoice)}>
+          <Download className="h-3.5 w-3.5 mr-1.5" /> PDF
         </Button>
-
         {userRole === 'ADMIN' && invoice.status === 'UNPAID' && (
-          <Button className="rounded-xl flex-1 bg-emerald-600" onClick={() => onMarkPaid(invoice.id)} disabled={isProcessing}>
-            {isProcessing ? <Loader2 className="animate-spin h-4 w-4" /> : <CheckCircle2 className="h-4 w-4 mr-2"/>}
+          <Button size="sm" disabled={isProcessing} onClick={() => onMarkPaid(invoice.id)}
+            className="rounded-lg h-9 flex-1 text-xs bg-emerald-500 hover:bg-emerald-600 text-white">
+            {isProcessing ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />}
             Mark Paid
           </Button>
         )}
-
         {userRole === 'TENANT' && (invoice.status === 'UNPAID' || invoice.status === 'PENDING_VERIFY') && (
-          <Button className="rounded-xl flex-1 bg-slate-900" onClick={onOpenPay}>
-            <Upload className="h-4 w-4 mr-2"/> Pay
+          <Button size="sm" onClick={onOpenPay}
+            className="rounded-lg h-9 flex-1 text-xs bg-foreground hover:bg-foreground/90 text-background">
+            <Upload className="h-3.5 w-3.5 mr-1.5" /> Pay
           </Button>
         )}
       </div>
-    </Card>
-  );
+    </div>
+  )
 }
 
-// Helper small component
-function DetailRow({ label, value, icon, variant }: any) {
+function Row({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
   return (
-    <div className="flex justify-between items-center py-2 border-b border-dashed border-slate-100">
-      <span className={cn(
-        "flex items-center gap-1.5 font-medium px-2 py-0.5 rounded-lg text-xs",
-        variant === 'amber' ? 'text-amber-600 bg-amber-50' : variant === 'blue' ? 'text-blue-600 bg-blue-50' : 'text-slate-500'
-      )}>
-        {icon} {label}
-      </span>
-      <span className="font-bold text-slate-700">{value}</span>
+    <div className="flex items-center justify-between">
+      <span className="flex items-center gap-1.5 text-xs text-muted-foreground">{icon}{label}</span>
+      <span className="text-xs font-medium text-foreground">{value}</span>
     </div>
-  );
+  )
 }
