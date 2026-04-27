@@ -1,75 +1,55 @@
-import { cn } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import type { Room, RoomStatus } from "@/lib/types"
-import { formatCurrency } from "@/lib/utils"
 import { User } from "lucide-react"
 
-const statusConfig: Record<RoomStatus, { label: string; bg: string; text: string; dot: string }> = {
-  VACANT: { 
-    label: "Available", 
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-500",
-    dot: "bg-emerald-500"
-  },
-  OCCUPIED: { 
-    label: "Occupied", 
-    bg: "bg-blue-500/15",
-    text: "text-blue-500",
-    dot: "bg-blue-500"
-  },
-  MAINTENANCE: { 
-    label: "Maintenance", 
-    bg: "bg-amber-500/15",
-    text: "text-amber-500",
-    dot: "bg-amber-500"
-  },
+const statusConfig: Record<RoomStatus, { label: string; bg: string; text: string; dot: string; topBar: string }> = {
+  VACANT:      { label: "Available",   bg: "bg-emerald-50",  text: "text-emerald-600", dot: "bg-emerald-500", topBar: "bg-emerald-500" },
+  OCCUPIED:    { label: "Occupied",    bg: "bg-blue-50",     text: "text-blue-600",    dot: "bg-blue-500",    topBar: "bg-blue-500"    },
+  MAINTENANCE: { label: "Maintenance", bg: "bg-amber-50",    text: "text-amber-600",   dot: "bg-amber-500",   topBar: "bg-amber-500"   },
 }
 
-interface RoomCardProps {
-  room: Room
-}
-
-export function RoomCard({ room }: RoomCardProps) {
-  const status = statusConfig[room.status] || statusConfig.VACANT;
-
-  const tenantDisplayName = room.currentTenant 
-    ? `${room.currentTenant.firstName} ${room.currentTenant.lastName}`
-    : null;
+export function RoomCard({ room }: { room: Room }) {
+  const status = statusConfig[room.status] ?? statusConfig.VACANT
+  const tenantName = room.currentTenant ? `${room.currentTenant.firstName} ${room.currentTenant.lastName}` : null
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 hover:border-foreground/20 transition-colors">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">{room.number}</h3>
-        <span className={cn(
-          "inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full",
-          status.bg, 
-          status.text
-        )}>
-          <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
-          {status.label}
-        </span>
-      </div>
-      
-      <div className="mb-3">
-        <span className="text-xl font-semibold">{formatCurrency(room.pricePerMonth)}</span>
-        <span className="text-sm text-muted-foreground ml-1">/mo</span>
-      </div>
-      
-      {room.currentTenant ? (
-        <div className="flex items-center gap-2 pt-3 border-t border-border">
-          <div className="h-7 w-7 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-            <User className="h-3.5 w-3.5 text-blue-500" />
-          </div>
-          <p className="text-sm font-medium truncate text-blue-700">
-            {tenantDisplayName}
-          </p>
+    <div className={cn(
+      "bg-card border border-border rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5",
+      room.status === 'OCCUPIED' && "border-blue-100",
+      room.status === 'MAINTENANCE' && "border-amber-100",
+    )}>
+      {/* Top color bar */}
+      <div className={cn("h-1", status.topBar)} />
+
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <h3 className="text-xl font-bold text-foreground" style={{ fontFamily: 'Syne, sans-serif' }}>{room.number}</h3>
+          <span className={cn("inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full", status.bg, status.text)}>
+            <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
+            {status.label}
+          </span>
         </div>
-      ) : (
+
+        <div className="mb-3">
+          <span className="text-base font-semibold text-foreground">{formatCurrency(room.pricePerMonth)}</span>
+          <span className="text-xs text-muted-foreground ml-1">/mo</span>
+        </div>
+
         <div className="pt-3 border-t border-border">
-          <p className="text-sm text-muted-foreground italic">
-            {room.status === 'MAINTENANCE' ? 'Under Repair' : 'No occupant'}
-          </p>
+          {tenantName ? (
+            <div className="flex items-center gap-2">
+              <div className="h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                <User className="h-3 w-3 text-blue-500" />
+              </div>
+              <p className="text-xs font-medium text-foreground truncate">{tenantName}</p>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">
+              {room.status === 'MAINTENANCE' ? 'Under repair' : 'No occupant'}
+            </p>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
