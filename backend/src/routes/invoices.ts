@@ -96,10 +96,6 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
       },
     })
     
-    if (existingInvoice) {
-      return { error: 'Invoice already exists for this month' }
-    }
-    
     // Get meter readings for the month
     const meterReadings = await prisma.meterReading.findMany({
       where: {
@@ -120,6 +116,32 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
     const waterCost = waterReading.usage * waterReading.rateAtTime
     const baseRent = lease.agreedBaseRent
     const totalAmount = baseRent + electricityCost + waterCost
+    
+    if (existingInvoice) {
+      if (existingInvoice.status === 'PAID') {
+        return { error: 'Cannot regenerate a PAID invoice' }
+      }
+      
+      // Update existing invoice instead of returning error
+      const updatedInvoice = await prisma.invoice.update({
+        where: { id: existingInvoice.id },
+        data: {
+          electricityCost,
+          waterCost,
+          totalAmount: baseRent + electricityCost + waterCost + (existingInvoice.otherCharges || 0),
+        },
+        include: {
+          lease: {
+            include: {
+              room: true,
+              tenant: true,
+            },
+          },
+        },
+      })
+      
+      return updatedInvoice
+    }
     
     // Generate invoice number
     const year = new Date().getFullYear()

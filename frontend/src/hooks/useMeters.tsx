@@ -96,7 +96,11 @@ export function useMeters() {
         const invalidRooms: string[] = []
         occupiedRooms.forEach(room => {
             const data = meterData[room.id]
-            if (room.isSaved) return 
+            const savedElec = room.recordedData?.electricity?.toString() || ""
+            const savedWater = room.recordedData?.water?.toString() || ""
+            const isChanged = (!room.isSaved) || (data.electricity.current !== savedElec) || (data.water.current !== savedWater)
+            
+            if (!isChanged) return 
             
             if (data?.electricity.current !== "" && data?.water.current !== "") {
                 const eCurr = parseFloat(data.electricity.current)
