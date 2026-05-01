@@ -37,11 +37,12 @@ export default function DashboardPage() {
 
   // Manual SVG Graph Calculations
   const maxRevenue = Math.max(...data.revenue.map((r: any) => r.revenue), 10000)
-  const points = data.revenue.map((r: any, i: number) => {
+  const pointsData = data.revenue.map((r: any, i: number) => {
     const x = (i / (data.revenue.length - 1)) * 100
     const y = 100 - (r.revenue / maxRevenue) * 100
-    return `${x},${y}`
-  }).join(' ')
+    return { x, y, revenue: r.revenue, month: r.month }
+  })
+  const points = pointsData.map(p => `${p.x},${p.y}`).join(' ')
 
   return (
     <div className="space-y-6 pb-20">
@@ -83,47 +84,76 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Chart (Manual SVG) */}
-        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
-          <h3 className="text-sm font-medium text-foreground mb-6 flex items-center gap-2">
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col">
+          <h3 className="text-sm font-medium text-foreground mb-6 flex items-center gap-2 flex-shrink-0">
             <Banknote className="h-4 w-4 text-blue-500" /> Revenue Analysis (Last 6 Months)
           </h3>
-          <div className="h-[200px] w-full relative">
-            <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
-              {/* Grid Lines */}
-              <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" className="text-border" strokeWidth="0.1" />
-              <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" className="text-border" strokeWidth="0.1" />
-              <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" className="text-border" strokeWidth="0.1" />
+          <div className="flex flex-1 w-full gap-4">
+            {/* Y-Axis */}
+            <div className="w-8 flex flex-col justify-between text-[9px] text-muted-foreground font-medium text-right pb-[26px] -mt-1.5">
+              <span>{Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(maxRevenue)}</span>
+              <span>{Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(maxRevenue * 0.75)}</span>
+              <span>{Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(maxRevenue * 0.5)}</span>
+              <span>{Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(maxRevenue * 0.25)}</span>
+              <span>0</span>
+            </div>
+            
+            {/* Graph Area */}
+            <div className="flex-1 relative h-[200px]">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+                {/* Grid Lines */}
+                <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" className="text-border" strokeWidth="0.1" />
+                <line x1="0" y1="25" x2="100" y2="25" stroke="currentColor" className="text-border" strokeWidth="0.1" />
+                <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" className="text-border" strokeWidth="0.1" />
+                <line x1="0" y1="75" x2="100" y2="75" stroke="currentColor" className="text-border" strokeWidth="0.1" />
+                <line x1="0" y1="100" x2="100" y2="100" stroke="currentColor" className="text-border" strokeWidth="0.1" />
+                
+                {/* Area */}
+                <polyline
+                  fill="url(#gradient)"
+                  points={`0,100 ${points} 100,100`}
+                  className="text-blue-500/10"
+                />
+                {/* Line */}
+                <polyline
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  points={points}
+                  className="text-blue-500"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <defs>
+                  <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
               
-              {/* Area */}
-              <polyline
-                fill="url(#gradient)"
-                points={`0,100 ${points} 100,100`}
-                className="text-blue-500/10"
-              />
-              {/* Line */}
-              <polyline
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                points={points}
-                className="text-blue-500"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <defs>
-                <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-            </svg>
-            {/* X-Axis Labels */}
-            <div className="flex justify-between mt-4">
-              {data.revenue.map((r: any) => (
-                <span key={r.month} className="text-[9px] text-muted-foreground font-medium uppercase">
-                  {r.month.split(' ')[0]}
-                </span>
+              {/* Data Points with Hover Tooltips */}
+              {pointsData.map((p: any, i: number) => (
+                <div 
+                  key={i} 
+                  className="absolute flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
+                  style={{ left: `${p.x}%`, top: `${p.y}%` }}
+                >
+                  <div className="absolute bottom-4 bg-foreground text-background text-[10px] px-2 py-1 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10 font-medium">
+                    {formatCurrency(p.revenue)}
+                  </div>
+                  <div className="h-2.5 w-2.5 rounded-full bg-card border-2 border-blue-500 group-hover:scale-125 transition-transform" />
+                </div>
               ))}
+
+              {/* X-Axis Labels */}
+              <div className="flex justify-between mt-4 relative z-0">
+                {data.revenue.map((r: any) => (
+                  <span key={r.month} className="text-[9px] text-muted-foreground font-medium uppercase relative" style={{ transform: 'translateX(-50%)', left: '0' }}>
+                    {r.month.split(' ')[0]}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -180,7 +210,7 @@ export default function DashboardPage() {
       {/* Recent Payments Table */}
       <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
         <div className="p-6 border-b border-border flex items-center justify-between">
-          <h3 className="text-sm font-medium text-foreground">Recent Financial Activity</h3>
+          <h3 className="text-sm font-medium text-foreground">Recent Payments</h3>
           <span className="text-[10px] font-medium text-blue-500 bg-blue-50 px-2 py-1 rounded-md uppercase">Live Updates</span>
         </div>
         <div className="overflow-x-auto">
