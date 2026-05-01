@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Wrench, Loader2, Search, Users, ShieldCheck, UserCog } from "lucide-react"
 
 export default function UserManagementPage() {
-  const { filteredUsers, loading, searchQuery, setSearchQuery, actions } = useUsers()
+  const { 
+    filteredUsers, loading, 
+    searchQuery, setSearchQuery,
+    roleFilter, setRoleFilter,
+    statusFilter, setStatusFilter,
+    actions 
+  } = useUsers()
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [isAddingTech, setIsAddingTech] = useState(false)
 
@@ -26,19 +32,44 @@ export default function UserManagementPage() {
   return (
     <div className="space-y-5 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-card p-5 rounded-xl border border-border shadow-sm">
         <div>
-          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>User Administration</h1>
+          <h1 className="text-base font-medium text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>User Management</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Manage roles and system access</p>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-72">
+        
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full lg:w-auto">
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-            <Input placeholder="Search user..." className="pl-9 h-9 rounded-lg bg-secondary border-border text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <Input placeholder="Search name/email..." className="pl-9 h-9 rounded-lg bg-secondary border-border text-sm" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
           </div>
-          <Button onClick={() => setIsAddingTech(true)} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg h-9">
-            <Wrench className="mr-1.5 h-3.5 w-3.5" /> Add Technician
-          </Button>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <select 
+              value={roleFilter} 
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="h-9 rounded-lg bg-secondary border-border text-xs px-3 focus:ring-1 focus:ring-blue-500 outline-none"
+            >
+              <option value="ALL">All Roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="TECHNICIAN">Technician</option>
+              <option value="TENANT">Tenant</option>
+            </select>
+
+            <select 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 rounded-lg bg-secondary border-border text-xs px-3 focus:ring-1 focus:ring-blue-500 outline-none"
+            >
+              <option value="ALL">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="SUSPENDED">Suspended</option>
+            </select>
+
+            <Button onClick={() => setIsAddingTech(true)} size="sm" className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg h-9 flex-1 sm:flex-none">
+              <Wrench className="mr-1.5 h-3.5 w-3.5" /> <span className="hidden sm:inline">Add Tech</span>
+            </Button>
+          </div>
         </div>
       </div>
 

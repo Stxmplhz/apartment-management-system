@@ -6,6 +6,8 @@ export function useUsers() {
     const [users, setUsers] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState("")
+    const [roleFilter, setRoleFilter] = useState("ALL")
+    const [statusFilter, setStatusFilter] = useState("ALL")
 
     const loadAllUsers = async () => {
         try {
@@ -23,15 +25,19 @@ export function useUsers() {
 
     const filteredUsers = useMemo(() => {
         return users.filter(u => {
-        const searchTarget = `
-            ${u.email} 
-            ${u.tenantProfile?.firstName || ''} 
-            ${u.tenantProfile?.lastName || ''}
-            ${u.techProfile?.firstName || ''}
-        `.toLowerCase()
-        return searchTarget.includes(searchQuery.toLowerCase())
+            const matchesSearch = `
+                ${u.email} 
+                ${u.tenantProfile?.firstName || ''} 
+                ${u.tenantProfile?.lastName || ''}
+                ${u.techProfile?.firstName || ''}
+            `.toLowerCase().includes(searchQuery.toLowerCase())
+
+            const matchesRole = roleFilter === "ALL" || u.role === roleFilter
+            const matchesStatus = statusFilter === "ALL" || (statusFilter === "ACTIVE" ? u.isActive : !u.isActive)
+
+            return matchesSearch && matchesRole && matchesStatus
         })
-    }, [users, searchQuery])
+    }, [users, searchQuery, roleFilter, statusFilter])
 
     const toggleStatus = async (id: string, current: boolean) => {
         try {
@@ -58,7 +64,10 @@ export function useUsers() {
     }
 
     return {
-        filteredUsers, loading, searchQuery, setSearchQuery,
+        filteredUsers, loading, 
+        searchQuery, setSearchQuery,
+        roleFilter, setRoleFilter,
+        statusFilter, setStatusFilter,
         actions: { 
             refresh: loadAllUsers,
             toggleStatus,

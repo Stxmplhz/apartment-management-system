@@ -49,11 +49,18 @@ export const meterRoutes = new Elysia({ prefix: '/api/meters' })
     })
     
     return occupiedRooms.map(room => {
+      // Find current month readings
       const thisMonthReadingElec = room.meterReadings.find(r => r.month === month && r.utilityType === 'ELECTRICITY')
       const thisMonthReadingWater = room.meterReadings.find(r => r.month === month && r.utilityType === 'WATER')
 
-      const lastReadingElec = room.meterReadings.find(r => r.month !== month && r.utilityType === 'ELECTRICITY')
-      const lastReadingWater = room.meterReadings.find(r => r.month !== month && r.utilityType === 'WATER')
+      // Find THE MOST RECENT reading that is chronologically before the selected month
+      // This is more robust than just finding "not this month"
+      const previousReadings = room.meterReadings
+        .filter(r => r.month < month)
+        .sort((a, b) => b.month.localeCompare(a.month)) // Sort by month desc
+
+      const lastReadingElec = previousReadings.find(r => r.utilityType === 'ELECTRICITY')
+      const lastReadingWater = previousReadings.find(r => r.utilityType === 'WATER')
 
       return {
         ...room,

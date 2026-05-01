@@ -96,18 +96,34 @@ export function useMeters() {
         const invalidRooms: string[] = []
         occupiedRooms.forEach(room => {
             const data = meterData[room.id]
-            if (room.isSaved) return // skip already saved rooms
+            if (room.isSaved) return 
+            
             if (data?.electricity.current !== "" && data?.water.current !== "") {
-                const eCalc = calculateUsage(data.electricity.previous, data.electricity.current)
-                const wCalc = calculateUsage(data.water.previous, data.water.current)
-                if (!eCalc.valid || !wCalc.valid) invalidRooms.push(room.number)
+                const eCurr = parseFloat(data.electricity.current)
+                const wCurr = parseFloat(data.water.current)
+                
+                let roomError = ""
+                if (isNaN(eCurr) || eCurr < data.electricity.previous) {
+                    roomError += `Elec (${eCurr} < ${data.electricity.previous})`
+                }
+                if (isNaN(wCurr) || wCurr < data.water.previous) {
+                    roomError += (roomError ? ", " : "") + `Water (${wCurr} < ${data.water.previous})`
+                }
+                
+                if (roomError) invalidRooms.push(`Room ${room.number}: ${roomError}`)
             }
         })
 
         if (invalidRooms.length > 0) {
-            return toast.error(`Cannot save! Room ${invalidRooms.join(', ')} has an invalid reading.`, {
-                duration: 5000, style: { background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }
-            })
+            return toast.error(
+                <div className="space-y-1">
+                    <p className="font-bold">Invalid Readings Detected:</p>
+                    <ul className="list-disc pl-4 text-[11px]">
+                        {invalidRooms.map((err, i) => <li key={i}>{err}</li>)}
+                    </ul>
+                </div>, 
+                { duration: 6000, style: { background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' } }
+            )
         }
 
         const roomsToUpdate = occupiedRooms.filter(room => {

@@ -23,7 +23,7 @@ export function Navigation() {
         { href: "/invoices", label: "Invoices", icon: FileText, section: "Finance" },
         { href: "/payments", label: "Payments", icon: CreditCard, section: "Finance" },
         { href: "/maintenance", label: "Maintenance", icon: Wrench, section: "Operations" },
-        { href: "/users", label: "User Admin", icon: Users, section: "Operations" },
+        { href: "/users", label: "User Management", icon: Users, section: "Operations" },
       ]
     }
     if (user.role === 'TENANT') {
