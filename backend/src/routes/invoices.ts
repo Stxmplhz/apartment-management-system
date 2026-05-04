@@ -1,6 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { prisma } from '../lib/prisma'
 import { InvoiceStatus } from '@prisma/client'
+import { sendEmail } from '../lib/email'
+import { invoiceEmailTemplate } from '../lib/email-templates'
 
 export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
   // Get all invoices
@@ -80,7 +82,9 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
       },
       include: {
         room: true,
-        tenant: true,
+        tenant: {
+          include: { user: true }
+        },
       },
     })
     
@@ -169,11 +173,32 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
         lease: {
           include: {
             room: true,
-            tenant: true,
+            tenant: {
+              include: { user: true }
+            },
           },
         },
       },
     })
+    
+    // Send email notification
+    if (invoice.lease.tenant.user.email) {
+      try {
+        await sendEmail({
+          to: invoice.lease.tenant.user.email,
+          subject: `New Invoice Generated - ${invoice.invoiceNumber}`,
+          html: invoiceEmailTemplate({
+            tenantName: `${invoice.lease.tenant.firstName} ${invoice.lease.tenant.lastName}`,
+            roomNumber: invoice.lease.room.number,
+            month: invoice.month,
+            totalAmount: invoice.totalAmount,
+            dueDate: invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A',
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send invoice email:', err);
+      }
+    }
     
     return invoice
   }, {
@@ -269,7 +294,12 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
     // 1. Get all active leases
     const activeLeases = await prisma.lease.findMany({
       where: { status: 'ACTIVE' },
-      include: { room: true, tenant: true }
+      include: { 
+        room: true, 
+        tenant: {
+          include: { user: true }
+        } 
+      }
     })
     
     let createdCount = 0
@@ -314,7 +344,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
         })
         const invoiceNumber = `INV-${year}-${String(count + createdCount + 1).padStart(4, '0')}`
         
-        await prisma.invoice.create({
+        const invoice = await prisma.invoice.create({
           data: {
             invoiceNumber,
             leaseId: lease.id,
@@ -327,6 +357,25 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
             dueDate: dueDate ? new Date(dueDate) : null,
           }
         })
+        
+        // Send email notification
+        if (lease.tenant.user.email) {
+          try {
+            await sendEmail({
+              to: lease.tenant.user.email,
+              subject: `New Invoice Generated - ${invoice.invoiceNumber}`,
+              html: invoiceEmailTemplate({
+                tenantName: `${lease.tenant.firstName} ${lease.tenant.lastName}`,
+                roomNumber: lease.room.number,
+                month: invoice.month,
+                totalAmount: invoice.totalAmount,
+                dueDate: invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A',
+              })
+            });
+          } catch (err) {
+            console.error(`Failed to send invoice email for Room ${lease.room.number}:`, err);
+          }
+        }
         
         createdCount++
         return { roomId: lease.room.number, status: 'CREATED' }

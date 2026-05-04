@@ -1,6 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { prisma } from '../lib/prisma'
 import { MaintenanceStatus } from '@prisma/client'
+import { sendEmail } from '../lib/email'
+import { maintenanceUpdateTemplate } from '../lib/email-templates'
 
 export const maintenanceRoutes = new Elysia({ prefix: '/api/maintenance' })
   // Get all maintenance requests
@@ -128,6 +130,34 @@ export const maintenanceRoutes = new Elysia({ prefix: '/api/maintenance' })
       },
     })
     
+    // Send email notification to tenant
+    const fullRequest = await prisma.maintenanceRequest.findUnique({
+      where: { id: request.id },
+      include: {
+        tenant: { include: { user: true } },
+        technician: { include: { user: true } }
+      }
+    });
+
+    if (fullRequest?.tenant?.user?.email) {
+      try {
+        await sendEmail({
+          to: fullRequest.tenant.user.email,
+          subject: `Maintenance Request Assigned - #${fullRequest.id.slice(-6)}`,
+          html: maintenanceUpdateTemplate({
+            tenantName: `${fullRequest.tenant.firstName} ${fullRequest.tenant.lastName}`,
+            requestId: fullRequest.id.slice(-6),
+            status: 'ASSIGNED',
+            description: fullRequest.description,
+            technicianName: fullRequest.technician?.user?.email, // Using email as name for now
+            adminNotes: fullRequest.adminNotes || undefined
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send maintenance assignment email:', err);
+      }
+    }
+    
     return request
   }, {
     body: t.Object({
@@ -179,6 +209,34 @@ export const maintenanceRoutes = new Elysia({ prefix: '/api/maintenance' })
         technician: true,
       },
     })
+    
+    // Send email notification to tenant
+    const fullReq = await prisma.maintenanceRequest.findUnique({
+      where: { id: request.id },
+      include: {
+        tenant: { include: { user: true } },
+        technician: { include: { user: true } }
+      }
+    });
+
+    if (fullReq?.tenant?.user?.email) {
+      try {
+        await sendEmail({
+          to: fullReq.tenant.user.email,
+          subject: `Maintenance Status Updated: ${newStatus} - #${fullReq.id.slice(-6)}`,
+          html: maintenanceUpdateTemplate({
+            tenantName: `${fullReq.tenant.firstName} ${fullReq.tenant.lastName}`,
+            requestId: fullReq.id.slice(-6),
+            status: newStatus,
+            description: fullReq.description,
+            technicianName: fullReq.technician?.user?.email,
+            adminNotes: fullReq.adminNotes || undefined
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send maintenance status update email:', err);
+      }
+    }
     
     return request
   }, {

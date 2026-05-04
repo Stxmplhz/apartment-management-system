@@ -1,6 +1,8 @@
 import { Elysia, t } from 'elysia'
 import { prisma } from '../lib/prisma'
 import { PaymentStatus, InvoiceStatus } from '@prisma/client'
+import { sendEmail } from '../lib/email'
+import { paymentVerifiedTemplate } from '../lib/email-templates'
 
 export const paymentRoutes = new Elysia({ prefix: '/api/payments' })
   // Get all payments
@@ -146,6 +148,32 @@ export const paymentRoutes = new Elysia({ prefix: '/api/payments' })
       
       return updatedPayment
     })
+    
+    // Fetch full data for email notification
+    const fullPayment = await prisma.payment.findUnique({
+      where: { id: payment.id },
+      include: {
+        tenant: { include: { user: true } },
+        invoice: true
+      }
+    });
+
+    if (fullPayment?.tenant?.user?.email) {
+      try {
+        await sendEmail({
+          to: fullPayment.tenant.user.email,
+          subject: `Payment ${status === 'PAID' ? 'Approved' : 'Rejected'} - ${fullPayment.invoice.invoiceNumber}`,
+          html: paymentVerifiedTemplate({
+            tenantName: `${fullPayment.tenant.firstName} ${fullPayment.tenant.lastName}`,
+            invoiceNumber: fullPayment.invoice.invoiceNumber,
+            amount: fullPayment.amount,
+            status: status as 'PAID' | 'REJECTED',
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send payment verification email:', err);
+      }
+    }
     
     return payment
   }, {

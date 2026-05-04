@@ -2,6 +2,8 @@ import { Elysia, t } from 'elysia'
 import { prisma } from '../lib/prisma'
 import { hash } from 'bcryptjs'
 import cloudinary from '../lib/cloudinary'
+import { sendEmail } from '../lib/email'
+import { welcomeEmailTemplate } from '../lib/email-templates'
 
 export const tenantRoutes = new Elysia({ prefix: '/api/tenants' })
   .onError(({ code, error, set }) => {
@@ -134,18 +136,40 @@ export const tenantRoutes = new Elysia({ prefix: '/api/tenants' })
 
       console.log("💾 [System] Starting DB Transaction...");
       const result = await prisma.$transaction(async (tx) => {
+        // Find or create user
         let user = await tx.user.findUnique({ where: { email } })
         if (user) {
-          user = await tx.user.update({ where: { id: user.id }, data: { isActive: true, role: 'TENANT' } })
+          user = await tx.user.update({ 
+            where: { id: user.id }, 
+            data: { isActive: true, role: 'TENANT' } 
+          })
         } else {
-          user = await tx.user.create({ data: { email, password: hashedPassword, role: 'TENANT' } })
+          user = await tx.user.create({ 
+            data: { email, password: hashedPassword, role: 'TENANT' } 
+          })
         }
 
-        const tenant = await tx.tenant.upsert({
-          where: { nationalId },
-          update: { firstName, lastName, phone, idCardUrl, userId: user.id },
-          create: { userId: user.id, firstName, lastName, phone, nationalId, idCardUrl }
+        // Find tenant by userId OR nationalId to avoid unique constraint issues
+        const existingTenant = await tx.tenant.findFirst({
+          where: {
+            OR: [
+              { userId: user.id },
+              { nationalId: nationalId }
+            ]
+          }
         });
+
+        let tenant;
+        if (existingTenant) {
+          tenant = await tx.tenant.update({
+            where: { id: existingTenant.id },
+            data: { firstName, lastName, phone, idCardUrl, nationalId, userId: user.id }
+          });
+        } else {
+          tenant = await tx.tenant.create({
+            data: { userId: user.id, firstName, lastName, phone, nationalId, idCardUrl }
+          });
+        }
 
         await tx.lease.create({
           data: {
@@ -185,6 +209,23 @@ export const tenantRoutes = new Elysia({ prefix: '/api/tenants' })
 
         return { tempPassword }
       })
+
+      // Send Welcome Email
+      try {
+        const room = await prisma.room.findUnique({ where: { id: roomId } });
+        await sendEmail({
+          to: email,
+          subject: 'Welcome to Your New Home!',
+          html: welcomeEmailTemplate({
+            tenantName: `${firstName} ${lastName}`,
+            roomNumber: room?.number || 'N/A',
+            email,
+            tempPassword: result.tempPassword
+          })
+        });
+      } catch (err) {
+        console.error('Failed to send welcome email:', err);
+      }
 
       return { success: true, tempPassword: result.tempPassword }
 
