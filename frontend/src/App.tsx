@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Layout from './components/shared/Layout'
 import LoginPage from './pages/LoginPage'
@@ -16,6 +16,14 @@ import LeaseManagementPage from './pages/LeaseManagementPage'
 import TenantInvoicesPage from './pages/TenantInvoicesPage'
 import TenantMaintenancePage from './pages/TenantMaintenancePage'
 import DashboardPage from './pages/DashboardPage'
+
+// Helper component for role-based redirection at the root path
+const HomeRedirect = () => {
+  const { user } = useAuth()
+  if (user?.role === 'TENANT') return <Navigate to="/dashboard" replace />
+  if (user?.role === 'TECHNICIAN') return <Navigate to="/maintenance" replace />
+  return <DashboardPage /> // Default for Admin
+}
 
 function App() {
   return (
@@ -33,15 +41,18 @@ function App() {
             </ProtectedRoute>
           }
         >
+          {/* Index route with smart redirect */}
+          <Route index element={<HomeRedirect />} />
+
           {/* Admin Only */}
           <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-            <Route index element={<DashboardPage />} />
             <Route path="rooms" element={<RoomDirectoryPage />} />
             <Route path="move-in" element={<MoveInPage />} />
             <Route path="meter" element={<MeterReadingPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="users" element={<UserManagementPage />} />
             <Route path="leases" element={<LeaseManagementPage />} />
+            <Route path="invoices" element={<InvoicesPage />} />
           </Route>
 
           {/* Tenant Only */}

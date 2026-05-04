@@ -24,20 +24,25 @@ async function fetchApi<T>(endpoint: string, options?: FetchOptions): Promise<T>
     body: isFormData ? options.body : (options?.body ? JSON.stringify(options.body) : undefined),
   })  
   
+  const text = await response.text();
+  let data: any;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = { error: 'Invalid JSON response from server' };
+  }
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-    
-    if (errorData.details && Array.isArray(errorData.details)) {
-      const msg = (errorData.details as ValidationErrorDetail[])
+    if (data.details && Array.isArray(data.details)) {
+      const msg = (data.details as ValidationErrorDetail[])
         .map((d) => `${d.path.substring(1)}: ${d.message}`)
         .join(', ')
       throw new Error(`Validation Error: ${msg}`)
     }
-    
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`)
+    throw new Error(data.error || `HTTP error! status: ${response.status}`)
   }
   
-  return response.json()
+  return data as T
 }
 
 export const api = {
@@ -190,4 +195,15 @@ export const api = {
     listTechnicians: () => 
       fetchApi<Technician[]>('/api/maintenance/technicians/list'),
   },
+
+  // Generic Upload
+  upload: (file: File, folder: string) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('folder', folder)
+    return fetchApi<{ url: string; error?: string }>('/api/upload', {
+      method: 'POST',
+      body: formData
+    })
+  }
 }

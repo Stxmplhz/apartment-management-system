@@ -10,6 +10,7 @@ import { maintenanceRoutes } from './routes/maintenance'
 import { userRoutes } from './routes/users'
 import { statsRoutes } from './routes/stats'
 import { leaseRoutes } from './routes/lease'
+import { uploadRoutes } from './routes/upload'
 
 const port = process.env.PORT || 3001
 
@@ -42,6 +43,7 @@ const app = new Elysia()
   .use(maintenanceRoutes)
   .use(statsRoutes)
   .use(leaseRoutes)
+  .use(uploadRoutes)
   .listen(port)
 
 console.log(`Server running at http://localhost:${port}`)

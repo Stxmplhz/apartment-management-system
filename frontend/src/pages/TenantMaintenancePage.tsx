@@ -17,6 +17,7 @@ export default function TenantMaintenancePage() {
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [description, setDescription] = useState("")
+  const [file, setFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -41,11 +42,28 @@ export default function TenantMaintenancePage() {
     if (!description.trim()) return toast.error("Please describe the issue")
     try {
       setSubmitting(true)
-      await api.maintenance.create({ tenantId: tenantId || '', description: description.trim(), imageUrl: imagePreview || undefined })
+      
+      let imageUrl = undefined
+      if (file) {
+        const uploadRes = await api.upload(file, 'maintenance_requests')
+        if (uploadRes.error) throw new Error(uploadRes.error)
+        imageUrl = uploadRes.url
+      }
+
+      await api.maintenance.create({ 
+        tenantId: tenantId || '', 
+        description: description.trim(), 
+        imageUrl 
+      })
+      
       toast.success("Request sent!")
-      setDescription(""); setImagePreview(null); setShowForm(false)
+      setDescription(""); setFile(null); setImagePreview(null); setShowForm(false)
       loadRequests()
-    } catch { toast.error("Submit failed") } finally { setSubmitting(false) }
+    } catch (error: any) { 
+      toast.error(error.message || "Submit failed") 
+    } finally { 
+      setSubmitting(false) 
+    }
   }
 
   const processedRequests = useMemo(() => {
@@ -98,8 +116,11 @@ export default function TenantMaintenancePage() {
                 <ImageIcon className="mr-1.5 h-3.5 w-3.5" /> Add Photo
               </Button>
               <Input id="img-upload" type="file" accept="image/*" onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) { const r = new FileReader(); r.onloadend = () => setImagePreview(r.result as string); r.readAsDataURL(file) }
+                const f = e.target.files?.[0]
+                if (f) { 
+                  setFile(f)
+                  const r = new FileReader(); r.onloadend = () => setImagePreview(r.result as string); r.readAsDataURL(f) 
+                }
               }} className="hidden" />
               {imagePreview && <span className="text-xs text-blue-500 font-medium bg-blue-500/10 px-2 py-1 rounded-md border border-blue-500/20">Photo selected ✓</span>}
               <div className="flex-1" />

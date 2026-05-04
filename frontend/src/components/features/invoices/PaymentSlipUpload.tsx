@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Upload, X, Loader2, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatCurrency } from '@/lib/utils'
@@ -28,18 +28,28 @@ export function PaymentSlipUpload({ invoice, open, onOpenChange, onSuccess }: {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!file) return toast.error('Please select a file')
+    
     setSubmitting(true)
-    const reader = new FileReader()
-    reader.onloadend = async () => {
-      try {
-        await api.payments.create({ invoiceId: invoice.id, amount: invoice.totalAmount, slipUrl: reader.result as string })
-        toast.success('Payment slip uploaded!')
-        setFile(null); setPreview(null)
-        onOpenChange(false); onSuccess?.()
-      } catch { toast.error('Upload failed') }
-      finally { setSubmitting(false) }
+    try {
+      // 1. Upload to Cloudinary first
+      const uploadRes = await api.upload(file, 'apartment_payments')
+      if (uploadRes.error) throw new Error(uploadRes.error)
+      
+      // 2. Create payment record with the Cloudinary URL
+      await api.payments.create({ 
+        invoiceId: invoice.id, 
+        amount: invoice.totalAmount, 
+        slipUrl: uploadRes.url 
+      })
+      
+      toast.success('Payment slip uploaded!')
+      setFile(null); setPreview(null)
+      onOpenChange(false); onSuccess?.()
+    } catch (error: any) { 
+      toast.error(error.message || 'Upload failed') 
+    } finally { 
+      setSubmitting(false) 
     }
-    reader.readAsDataURL(file)
   }
 
   const reset = () => { setFile(null); setPreview(null) }
@@ -49,7 +59,7 @@ export function PaymentSlipUpload({ invoice, open, onOpenChange, onSuccess }: {
       <DialogContent className="max-w-sm rounded-xl border-border p-0 overflow-hidden gap-0">
         <div className="h-1 bg-blue-500" />
         <div className="px-5 py-4 border-b border-border">
-          <DialogTitle className="text-sm font-medium" style={{ fontFamily: 'Lexend, sans-serif' }}>Upload Payment Slip</DialogTitle>
+          <DialogTitle className="text-sm font-medium">Upload Payment Slip</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-0.5">
             Invoice {invoice.invoiceNumber}
           </DialogDescription>

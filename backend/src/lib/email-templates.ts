@@ -29,6 +29,8 @@ const emailLayout = (content: string) => `
   </div>
 `;
 
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+
 export const welcomeEmailTemplate = (data: {
   tenantName: string;
   roomNumber: string;
@@ -56,7 +58,7 @@ export const welcomeEmailTemplate = (data: {
   </div>
 
   <div style="text-align: center;">
-    <a href="#" style="background-color: #3b82f6; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); font-family: sans-serif;">Login to Tenant Portal</a>
+    <a href="${FRONTEND_URL}/login" style="background-color: #3b82f6; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); font-family: sans-serif;">Login to Tenant Portal</a>
   </div>
   
   <p style="font-size: 13px; color: #94a3b8; text-align: center; margin-top: 24px; font-family: sans-serif;">
@@ -94,7 +96,7 @@ export const invoiceEmailTemplate = (data: {
   </div>
 
   <div style="text-align: center;">
-    <a href="#" style="background-color: #3b82f6; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; font-family: sans-serif;">View Details & Pay</a>
+    <a href="${FRONTEND_URL}/my-invoices" style="background-color: #3b82f6; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; font-family: sans-serif;">View Details & Pay</a>
   </div>
 `);
 
@@ -184,6 +186,6 @@ export const maintenanceUpdateTemplate = (data: {
   </div>
 
   <div style="text-align: center;">
-    <a href="#" style="background-color: #3b82f6; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; font-family: sans-serif;">Track Progress</a>
+    <a href="${FRONTEND_URL}/my-maintenance" style="background-color: #3b82f6; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 15px; display: inline-block; font-family: sans-serif;">Track Progress</a>
   </div>
 `);
