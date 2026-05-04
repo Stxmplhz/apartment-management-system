@@ -145,6 +145,8 @@ export const api = {
       fetchApi<Invoice>('/api/invoices', { method: 'POST', body: data }),
     update: (id: string, data: Partial<Invoice>) => 
       fetchApi<Invoice>(`/api/invoices/${id}`, { method: 'PUT', body: data }),
+    syncOverdue: () => 
+      fetchApi<any>('/api/invoices/sync-overdue', { method: 'POST' }),
   },
   
   // Payments

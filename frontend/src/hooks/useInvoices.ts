@@ -83,9 +83,24 @@ export function useInvoices(selectedMonth: string) {
     }
   };
 
+  const handleSyncOverdue = async () => {
+    try {
+      setLoading(true);
+      const res = await api.invoices.syncOverdue();
+      if (res.success) {
+        toast.success(`Success! Updated ${res.updatedCount} invoices to Overdue.`);
+        await loadInvoices();
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sync overdue status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     processedInvoices, loading, stats, processingId,
     filters: { searchQuery, setSearchQuery, statusFilter, setStatusFilter, floorFilter, setFloorFilter, sortBy, setSortBy },
-    actions: { handleMarkPaid, handleGenerateAll, refresh: loadInvoices }
+    actions: { handleMarkPaid, handleGenerateAll, handleSyncOverdue, refresh: loadInvoices }
   };
 }

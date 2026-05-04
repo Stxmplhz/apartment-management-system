@@ -6,7 +6,7 @@ import { InvoiceFilterBar } from "@/components/features/invoices/InvoiceFilterBa
 import { PaymentSlipUpload } from "@/components/features/invoices/PaymentSlipUpload"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Calendar, Loader2, Receipt } from "lucide-react"
+import { Search, Calendar, Loader2, Receipt, RefreshCw } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
 import type { Invoice } from "@/lib/types"
 
@@ -48,6 +48,17 @@ export default function InvoicesPage() {
           </div>
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={actions.handleSyncOverdue} 
+              disabled={loading}
+              className="h-10 rounded-xl border-border hover:bg-secondary flex items-center gap-2 text-xs font-medium"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Sync Status</span>
+            </Button>
+
             <div className="flex items-center gap-2 bg-secondary border border-border rounded-xl px-3 h-10 flex-1 sm:flex-none">
               <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
               <input 

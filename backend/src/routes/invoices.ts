@@ -43,6 +43,25 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
 
     return enrichedInvoices
   })
+
+  // Sync overdue status (UC-24)
+  .post('/sync-overdue', async () => {
+    const now = new Date()
+    const result = await prisma.invoice.updateMany({
+      where: {
+        status: 'UNPAID',
+        dueDate: {
+          lt: now,
+          not: null
+        }
+      },
+      data: {
+        status: 'OVERDUE'
+      }
+    })
+    
+    return { success: true, updatedCount: result.count }
+  })
   
   // Get single invoice
   .get('/:id', async ({ params }) => {
@@ -156,6 +175,14 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
     })
     const invoiceNumber = `INV-${year}-${String(count + 1).padStart(4, '0')}`
     
+    // Calculate default due date: 5th of the next month (UC-24)
+    let finalDueDate = dueDate ? new Date(dueDate) : null
+    if (!finalDueDate) {
+      // month is expected to be "YYYY-MM"
+      const [y, m] = month.split('-').map(Number)
+      finalDueDate = new Date(y, m, 5) // JS Date: month is 0-indexed, so passing 'm' (1-12) correctly sets it to the next month's 5th
+    }
+    
     // Create invoice
     const invoice = await prisma.invoice.create({
       data: {
@@ -167,7 +194,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
         waterCost,
         totalAmount,
         status: 'UNPAID',
-        dueDate: dueDate ? new Date(dueDate) : null,
+        dueDate: finalDueDate,
       },
       include: {
         lease: {
@@ -344,6 +371,13 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
         })
         const invoiceNumber = `INV-${year}-${String(count + createdCount + 1).padStart(4, '0')}`
         
+        // Calculate default due date: 5th of the next month (UC-24)
+        let finalDueDate = dueDate ? new Date(dueDate) : null
+        if (!finalDueDate) {
+          const [y, m] = month.split('-').map(Number)
+          finalDueDate = new Date(y, m, 5) 
+        }
+
         const invoice = await prisma.invoice.create({
           data: {
             invoiceNumber,
@@ -354,7 +388,7 @@ export const invoiceRoutes = new Elysia({ prefix: '/api/invoices' })
             waterCost,
             totalAmount,
             status: 'UNPAID',
-            dueDate: dueDate ? new Date(dueDate) : null,
+            dueDate: finalDueDate,
           }
         })
         
