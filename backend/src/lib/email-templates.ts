@@ -19,7 +19,7 @@ const emailLayout = (content: string) => `
       <!-- Footer Area -->
       <div style="padding: 24px 32px; background-color: #f1f5f9; border-top: 1px solid #e2e8f0; text-align: center;">
         <p style="margin: 0; color: #64748b; font-size: 12px; font-family: sans-serif;">
-          &copy; ${new Date().getFullYear()} NestAdmin. All rights reserved.
+          &copy; ${new Date().getFullYear()} Reside. All rights reserved.
         </p>
         <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 11px; font-family: sans-serif;">
           This is an automated notification. Please do not reply to this email.
