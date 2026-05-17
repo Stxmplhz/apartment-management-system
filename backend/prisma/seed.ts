@@ -39,7 +39,7 @@ async function main() {
   const techPassword = await hash('tech123', 10)
   const techUser = await prisma.user.create({
     data: {
-      email: 'technician@apartment.com',
+      email: 'tech@apartment.com',
       password: techPassword,
       role: Role.TECHNICIAN,
       isActive: true,
