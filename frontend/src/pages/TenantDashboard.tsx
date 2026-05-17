@@ -106,7 +106,7 @@ export default function TenantDashboard() {
               { icon: Home, label: 'Room', value: `Room ${lease.room?.number ?? '-'}` },
               { icon: CreditCard, label: 'Monthly Rent', value: formatTHB(lease.agreedBaseRent) },
               { icon: Calendar, label: 'Lease Expires', value: lease.endDate ? new Date(lease.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Indefinite' },
-            ].map(({ icon: Icon, label, value }) => (
+            ].map(({ label, value }) => (
               <div key={label} className="px-5 py-4">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
                 <p className="text-sm font-semibold text-foreground">{value}</p>

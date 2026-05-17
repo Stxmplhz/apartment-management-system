@@ -42,7 +42,7 @@ export default function DashboardPage() {
     const y = 100 - (r.revenue / maxRevenue) * 100
     return { x, y, revenue: r.revenue, month: r.month }
   })
-  const points = pointsData.map(p => `${p.x},${p.y}`).join(' ')
+  const points = pointsData.map((p: { x: number; y: number }) => `${p.x},${p.y}`).join(' ')
 
   return (
     <div className="space-y-6 pb-20">

@@ -3,7 +3,7 @@ import { useLeases } from "@/hooks/useLeases"
 import { LeaseDetailModal } from "@/components/features/leases/LeaseDetailModal"
 import { LeaseFilterBar } from "@/components/features/leases/LeaseFilterBar"
 import { Input } from "@/components/ui/input"
-import { Search, Loader2, FileText, User, Phone } from "lucide-react"
+import { Search, Loader2, FileText, Phone } from "lucide-react"
 import { cn, formatDateEng } from "@/lib/utils"
 import type { Lease } from "@/lib/types"
 
@@ -65,7 +65,7 @@ export default function LeaseManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {processedLeases.map((lease, i) => {
+              {processedLeases.map((lease) => {
                 const isExpiringSoon = lease.endDate &&
                   (new Date(lease.endDate).getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000) &&
                   lease.status === 'ACTIVE'

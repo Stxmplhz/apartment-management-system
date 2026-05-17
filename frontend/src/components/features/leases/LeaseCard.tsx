@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { User, Phone, Calendar } from "lucide-react";
+import { User, Phone } from "lucide-react";
 import { cn, formatDateEng, formatCurrency } from "@/lib/utils";
 
 export function LeaseCard({ lease, onOpenDetail }: any) {

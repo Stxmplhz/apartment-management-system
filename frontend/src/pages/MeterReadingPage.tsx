@@ -121,7 +121,7 @@ export default function MeterReadingPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRooms.map((room, i) => {
+                {filteredRooms.map((room) => {
                   const data = meterData[room.id]
                   if (!data) return null
                   const elecUsage = data.electricity.current ? Math.max(0, parseFloat(data.electricity.current) - data.electricity.previous) : 0
