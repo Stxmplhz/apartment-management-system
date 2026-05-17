@@ -75,7 +75,7 @@ export function Navigation() {
           <Building2 className="h-4 w-4 text-white" />
         </div>
         <div>
-          <div className="font-medium text-sm text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>NestAdmin</div>
+          <div className="font-medium text-sm text-foreground" style={{ fontFamily: 'Lexend, sans-serif' }}>Reside</div>
           <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Management System</div>
         </div>
       </div>
@@ -135,7 +135,7 @@ export function Navigation() {
           <div className="h-7 w-7 rounded-lg bg-blue-500 flex items-center justify-center">
             <Building2 className="h-4 w-4 text-white" />
           </div>
-          <span className="font-medium text-sm" style={{ fontFamily: 'Lexend, sans-serif' }}>NestAdmin</span>
+          <span className="font-medium text-sm" style={{ fontFamily: 'Lexend, sans-serif' }}>Reside</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}

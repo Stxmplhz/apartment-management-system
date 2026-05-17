@@ -16,3 +16,8 @@ next.user-config.*
 node_modules
 .next/
 .DS_Store
+
+# Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/playwright/.cache/

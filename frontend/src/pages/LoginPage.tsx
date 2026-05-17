@@ -28,7 +28,7 @@ export default function LoginPage() {
             <Building2 className="h-7 w-7 text-white" />
           </div>
           <div className="text-center">
-            <h1 className="text-3xl font-semibold text-foreground tracking-tight" style={{ fontFamily: 'Lexend, sans-serif' }}>NestAdmin</h1>
+            <h1 className="text-3xl font-semibold text-foreground tracking-tight" style={{ fontFamily: 'Lexend, sans-serif' }}>Reside</h1>
             <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] mt-1.5 font-medium">Management System</p>
           </div>
         </div>
@@ -48,7 +48,7 @@ export default function LoginPage() {
         </div>
         
         <p className="text-center text-[11px] text-muted-foreground mt-8 font-medium tracking-wide">
-          &copy; {new Date().getFullYear()} NestAdmin. All rights reserved.
+          &copy; {new Date().getFullYear()} Reside. All rights reserved.
         </p>
       </div>
     </div>
